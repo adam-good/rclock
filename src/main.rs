@@ -9,7 +9,7 @@ use ratatui::{
     style::Stylize,
     symbols::border,
     text::{Line, Text},
-    widgets::{Block, Paragraph, Widget},
+    widgets::{Block, Padding, Paragraph, Widget},
 };
 
 use chrono::{DateTime, Local};
@@ -65,13 +65,11 @@ impl Widget for &App {
         let block = Block::bordered()
             .title(title.centered())
             .title_bottom(instructions.centered())
-            .border_set(border::THICK);
+            .border_set(border::THICK)
+            .padding(Padding::new(0, 0, area.height / 2, 0));
 
-        let counter_text = Text::from(vec![Line::from(vec![
-            self.time.format("%H:%M:%S").to_string().yellow(),
-        ])]);
-
-        Paragraph::new(counter_text)
+        let timer_text = Text::from(self.time.format("%H:%M:%S").to_string().yellow());
+        Paragraph::new(timer_text)
             .centered()
             .block(block)
             .render(area, buf);
