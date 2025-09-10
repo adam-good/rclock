@@ -1,26 +1,26 @@
-use ratatui::layout::Constraint;
-use ratatui::layout::Direction;
-use ratatui::layout::Layout;
-use ratatui::layout::Rect;
+use std::time::Duration;
 
-fn main() {}
+mod app;
 
-struct UI {}
+fn sleep(n: u64) {
+    std::thread::sleep(Duration::new(n, 0));
+}
 
-impl UI {
-    fn new() -> Self {
-        let outer_layout = Layout::default()
-            .direction(Direction::Vertical)
-            .constraints(vec![Constraint::Percentage(50), Constraint::Percentage(50)])
-            .split(Rect::default());
+fn main() {
+    let mut app = app::App::new();
 
-        let inner_layout = Layout::default()
-            .direction(Direction::Horizontal)
-            .constraints(vec![Constraint::Percentage(25), Constraint::Percentage(75)])
-            .split(Rect::default());
-
-        Self {}
+    for _x in vec![1, 2, 3] {
+        app.new_timer().unwrap();
+        sleep(1);
     }
 
-    fn draw(&mut self) {}
+    let mut i = 0;
+    while i < 60 {
+        app.update().unwrap();
+        println!("{}", app);
+        i = i + 1;
+        sleep(1);
+    }
+
+    println!("{:?}", app.base_time);
 }
