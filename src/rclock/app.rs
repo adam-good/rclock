@@ -4,7 +4,7 @@ use std::io;
 
 use std::fmt;
 
-mod timer;
+use crate::app::timer;
 
 pub struct App {
     pub base_time: DateTime<Local>,

@@ -1,13 +1,13 @@
 use std::time::Duration;
 
-mod app;
+mod rclock;
 
 fn sleep(n: u64) {
     std::thread::sleep(Duration::new(n, 0));
 }
 
 fn main() {
-    let mut app = app::App::new();
+    let mut app = rclock::app::App::new();
 
     for _x in vec![1, 2, 3] {
         app.new_timer().unwrap();
