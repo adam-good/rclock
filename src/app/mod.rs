@@ -20,7 +20,7 @@ impl App {
     }
 
     pub fn new_timer(&mut self) -> io::Result<()> {
-        self.timers.push(timer::Timer::new(self.base_time));
+        self.timers.push(timer::Timer::new(Local::now()));
         Ok(())
     }
 
@@ -36,7 +36,7 @@ impl App {
 
 impl fmt::Display for App {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match write!(f, "{}\n", self.base_time) {
+        match write!(f, "{}\n", self.base_time.format("%H:%M")) {
             Ok(v) => v,
             Err(_e) => panic!("Error Displaying App"),
         }

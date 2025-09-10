@@ -1,6 +1,7 @@
 use chrono::DateTime;
 use chrono::Local;
 use chrono::TimeDelta;
+use chrono::Utc;
 
 use std::fmt;
 
@@ -24,6 +25,10 @@ impl Timer {
 
 impl fmt::Display for Timer {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", self.offset)
+        write!(
+            f,
+            "{}",
+            (DateTime::<Utc>::default() + self.offset).format("%H:%M:%S")
+        )
     }
 }
