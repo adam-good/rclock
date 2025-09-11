@@ -6,6 +6,7 @@ use ratatui::layout::Direction;
 use ratatui::layout::Layout;
 use ratatui::layout::Rect;
 use ratatui::widgets::Block;
+use ratatui::widgets::Borders;
 use ratatui::widgets::Paragraph;
 
 pub struct UI {
@@ -19,13 +20,12 @@ impl UI {
     }
 
     pub fn view(&mut self, app: &app::App) {
-        let time_str = app.base_time.format("%H:%M:%S").to_string();
         self.terminal
             .draw(|frame| {
                 let (top, left, right) = UI::layout(frame);
-                frame.render_widget(Paragraph::new(time_str), top);
-                frame.render_widget(Paragraph::new("left"), left);
-                frame.render_widget(Paragraph::new("right"), right);
+                UI::render_top_widget(frame, top, app);
+                UI::render_left_widget(frame, left, app);
+                UI::render_right_widget(frame, right, app);
             })
             .expect("EEP");
     }
@@ -43,6 +43,27 @@ impl UI {
             .split(bottom);
         let (left, right) = (inner_layout[0], inner_layout[1]);
 
-        return (top, left, right);
+        (top, left, right)
+    }
+
+    // TODO: Make this show current time
+    fn render_top_widget(frame: &mut Frame, area: Rect, app: &app::App) {
+        let block = Block::new().borders(Borders::ALL);
+        let msg = app.base_time.format("%H:%M:%S").to_string();
+        frame.render_widget(Paragraph::new(msg).block(block), area);
+    }
+
+    // TODO: Make this show a timer
+    fn render_left_widget(frame: &mut Frame, area: Rect, app: &app::App) {
+        let block = Block::new().borders(Borders::ALL);
+        let msg = app.base_time.format("%H:%M:%S").to_string();
+        frame.render_widget(Paragraph::new(msg).block(block), area);
+    }
+
+    // TODO: Make this show a progress bar
+    fn render_right_widget(frame: &mut Frame, area: Rect, app: &app::App) {
+        let block = Block::new().borders(Borders::ALL);
+        let msg = app.base_time.format("%H:%M:%S").to_string();
+        frame.render_widget(Paragraph::new(msg).block(block), area);
     }
 }
