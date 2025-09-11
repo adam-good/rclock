@@ -7,6 +7,7 @@ use ratatui::layout::Layout;
 use ratatui::layout::Rect;
 use ratatui::widgets::Block;
 use ratatui::widgets::Borders;
+use ratatui::widgets::Padding;
 use ratatui::widgets::Paragraph;
 
 pub struct UI {
@@ -48,9 +49,15 @@ impl UI {
 
     // TODO: Make this show current time
     fn render_top_widget(frame: &mut Frame, area: Rect, app: &app::App) {
-        let block = Block::new().borders(Borders::ALL);
-        let msg = app.base_time.format("%H:%M:%S").to_string();
-        frame.render_widget(Paragraph::new(msg).block(block), area);
+        let block = Block::new().borders(Borders::ALL).padding(Padding {
+            left: 0,
+            right: 0,
+            top: area.height / 2,
+            bottom: 0,
+        });
+        let text = app.base_time.format("%H:%M:%S").to_string();
+        let widget = Paragraph::new(text).centered().block(block);
+        frame.render_widget(widget, area);
     }
 
     // TODO: Make this show a timer
@@ -66,4 +73,14 @@ impl UI {
         let msg = app.base_time.format("%H:%M:%S").to_string();
         frame.render_widget(Paragraph::new(msg).block(block), area);
     }
+    /*
+        fn center_area(area: Rect, horizontal: Constraint, vertical: Constraint) -> Rect {
+            let [area] = Layout::horizontal([horizontal])
+                .flex(Flex::Center)
+                .areas(area);
+            let [area] = Layout::vertical([vertical]).flex(Flex::Center).areas(area);
+
+            area
+        }
+    */
 }

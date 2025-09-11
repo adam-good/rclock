@@ -12,10 +12,7 @@ fn main() {
     let mut app: app::App = app::App::new();
     let mut app_ui: ui::UI = ui::UI::new();
 
-    for _x in vec![1, 2, 3] {
-        app.new_timer().unwrap();
-        sleep(1);
-    }
+    app.new_timer().unwrap();
 
     let mut i = 0;
     while i < 10 {
