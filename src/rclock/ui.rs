@@ -1,4 +1,5 @@
 use crate::rclock::app;
+use crate::rclock::drawer;
 use ratatui::DefaultTerminal;
 use ratatui::Frame;
 use ratatui::layout::Constraint;
