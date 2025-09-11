@@ -2,6 +2,7 @@ use std::time::Duration;
 
 mod rclock;
 use rclock::app;
+use rclock::ui;
 
 fn sleep(n: u64) {
     std::thread::sleep(Duration::new(n, 0));
@@ -9,11 +10,22 @@ fn sleep(n: u64) {
 
 fn main() {
     let mut app: app::App = app::App::new();
+    let mut app_ui: ui::UI = ui::UI::new();
 
     for _x in vec![1, 2, 3] {
         app.new_timer().unwrap();
         sleep(1);
     }
+
+    let mut i = 0;
+    while i < 10 {
+        app.update().expect("FUCK");
+        app_ui.view(&app);
+        sleep(1);
+        i = i + 1;
+    }
+
+    ratatui::restore();
 
     /*
         let mut i = 0;
