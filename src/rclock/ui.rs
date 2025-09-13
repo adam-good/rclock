@@ -10,6 +10,7 @@ use ratatui::widgets::Block;
 use ratatui::widgets::Borders;
 use ratatui::widgets::Padding;
 use ratatui::widgets::Paragraph;
+use ratatui::widgets::canvas::Canvas;
 
 pub struct UI {
     terminal: DefaultTerminal,
@@ -49,15 +50,20 @@ impl UI {
     }
 
     // TODO: Make this show current time
-    fn render_top_widget(frame: &mut Frame, area: Rect, app: &app::App) {
+    fn render_top_widget(frame: &mut Frame, area: Rect, _app: &app::App) {
         let block = Block::new().borders(Borders::ALL).padding(Padding {
             left: 0,
             right: 0,
             top: area.height / 2,
             bottom: 0,
         });
-        let text = app.base_time.format("%H:%M:%S").to_string();
-        let widget = Paragraph::new(text).centered().block(block);
+        //        let text = app.base_time.format("%H:%M:%S").to_string();
+        //        let widget = Paragraph::new(text).centered().block(block);
+        let widget = Canvas::default()
+            .block(block)
+            .x_bounds([0.0, area.width.into()])
+            .y_bounds([0.0, area.height.into()])
+            .paint(drawer::zero);
         frame.render_widget(widget, area);
     }
 
@@ -74,6 +80,7 @@ impl UI {
         let msg = app.base_time.format("%H:%M:%S").to_string();
         frame.render_widget(Paragraph::new(msg).block(block), area);
     }
+
     /*
         fn center_area(area: Rect, horizontal: Constraint, vertical: Constraint) -> Rect {
             let [area] = Layout::horizontal([horizontal])
