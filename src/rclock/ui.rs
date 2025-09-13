@@ -6,11 +6,13 @@ use ratatui::layout::Constraint;
 use ratatui::layout::Direction;
 use ratatui::layout::Layout;
 use ratatui::layout::Rect;
+// use ratatui::symbols::Marker;
 use ratatui::widgets::Block;
 use ratatui::widgets::Borders;
-use ratatui::widgets::Padding;
+// use ratatui::widgets::Padding;
 use ratatui::widgets::Paragraph;
 use ratatui::widgets::canvas::Canvas;
+use ratatui::widgets::canvas::Context;
 
 pub struct UI {
     terminal: DefaultTerminal,
@@ -29,6 +31,9 @@ impl UI {
                 UI::render_top_widget(frame, top, app);
                 UI::render_left_widget(frame, left, app);
                 UI::render_right_widget(frame, right, app);
+
+                let (digit1, digit2, sep, digit3, digit4) = UI::clock_layout(top);
+                UI::render_clock(frame, digit1, digit2, sep, digit3, digit4);
             })
             .expect("EEP");
     }
@@ -49,22 +54,93 @@ impl UI {
         (top, left, right)
     }
 
-    // TODO: Make this show current time
-    fn render_top_widget(frame: &mut Frame, area: Rect, _app: &app::App) {
-        let block = Block::new().borders(Borders::ALL).padding(Padding {
-            left: 0,
-            right: 0,
-            top: area.height / 2,
-            bottom: 0,
-        });
-        //        let text = app.base_time.format("%H:%M:%S").to_string();
-        //        let widget = Paragraph::new(text).centered().block(block);
+    fn clock_layout(area: Rect) -> (Rect, Rect, Rect, Rect, Rect) {
+        let vert_split = Layout::default()
+            .direction(Direction::Vertical)
+            .constraints(vec![
+                Constraint::Percentage(15),
+                Constraint::Percentage(50),
+                Constraint::Percentage(15),
+            ])
+            .split(area);
+        let middle = vert_split[1];
+
+        let horz_split = Layout::default()
+            .direction(Direction::Horizontal)
+            .constraints(vec![
+                Constraint::Percentage(15),
+                Constraint::Percentage(14),
+                Constraint::Percentage(14),
+                Constraint::Percentage(14),
+                Constraint::Percentage(14),
+                Constraint::Percentage(14),
+                Constraint::Percentage(15),
+            ])
+            .split(middle);
+        let (digit1, digit2, sep, digit3, digit4) = (
+            horz_split[1],
+            horz_split[2],
+            horz_split[3],
+            horz_split[4],
+            horz_split[5],
+        );
+
+        (digit1, digit2, sep, digit3, digit4)
+    }
+
+    fn render_clock(
+        frame: &mut Frame,
+        digit1: Rect,
+        digit2: Rect,
+        sep: Rect,
+        digit3: Rect,
+        digit4: Rect,
+    ) {
+        UI::render_digit(frame, digit1, drawer::zero);
+        UI::render_digit(frame, digit2, drawer::zero);
+        UI::render_digit(frame, sep, drawer::sep);
+        UI::render_digit(frame, digit3, drawer::zero);
+        UI::render_digit(frame, digit4, drawer::zero);
+    }
+
+    fn render_digit(frame: &mut Frame, area: Rect, val: fn(&mut Context)) {
+        let block = Block::new().borders(Borders::ALL);
+
+        //println!("{} -- {}", area.width, area.height);
+
+        let left: f64 = 0.0;
+        let right: f64 = f64::from(area.width);
+        let bottom: f64 = 0.0;
+        let top: f64 = f64::from(area.height).mul_add(2.0, -4.0);
         let widget = Canvas::default()
             .block(block)
-            .x_bounds([0.0, area.width.into()])
-            .y_bounds([0.0, area.height.into()])
-            .paint(drawer::zero);
+            //.marker(Marker::HalfBlock)
+            .x_bounds([left, right])
+            .y_bounds([bottom, top])
+            .paint(val);
+
         frame.render_widget(widget, area);
+    }
+
+    // TODO: Make this show current time
+    fn render_top_widget(frame: &mut Frame, area: Rect, _app: &app::App) {
+        let block = Block::new().borders(Borders::ALL);
+        //        let text = app.base_time.format("%H:%M:%S").to_string();
+        //        let widget = Paragraph::new(text).centered().block(block);
+        //        let left: f64 = 0.0;
+        //        let right: f64 = f64::from(area.width);
+        //        let bottom: f64 = 0.0;
+        //        let top = f64::from(area.height).mul_add(2.0, -4.0); // NOTE: Why the mul_add?
+        /*
+        let widget = Canvas::default()
+            .block(block)
+            .marker(ratatui::symbols::Marker::HalfBlock)
+            .x_bounds([left, right])
+            .y_bounds([bottom, top])
+            .paint(drawer::zero);
+        */
+
+        frame.render_widget(block, area);
     }
 
     // TODO: Make this show a timer
