@@ -6,10 +6,9 @@ use ratatui::layout::Constraint;
 use ratatui::layout::Direction;
 use ratatui::layout::Layout;
 use ratatui::layout::Rect;
-// use ratatui::symbols::Marker;
+use ratatui::symbols::Marker;
 use ratatui::widgets::Block;
 use ratatui::widgets::Borders;
-// use ratatui::widgets::Padding;
 use ratatui::widgets::Paragraph;
 use ratatui::widgets::canvas::Canvas;
 use ratatui::widgets::canvas::Context;
@@ -41,7 +40,7 @@ impl UI {
     fn layout(frame: &mut Frame) -> (Rect, Rect, Rect) {
         let outer_layout = Layout::default()
             .direction(Direction::Vertical)
-            .constraints(vec![Constraint::Percentage(50), Constraint::Percentage(50)])
+            .constraints(vec![Constraint::Percentage(75), Constraint::Percentage(25)])
             .split(frame.area());
         let (top, bottom) = (outer_layout[0], outer_layout[1]);
 
@@ -96,25 +95,22 @@ impl UI {
         digit3: Rect,
         digit4: Rect,
     ) {
-        UI::render_digit(frame, digit1, drawer::zero);
-        UI::render_digit(frame, digit2, drawer::zero);
-        UI::render_digit(frame, sep, drawer::sep);
-        UI::render_digit(frame, digit3, drawer::zero);
-        UI::render_digit(frame, digit4, drawer::zero);
+        UI::render_digit(frame, digit1, |context| drawer::zero(context, digit1));
+        UI::render_digit(frame, digit2, |context| drawer::zero(context, digit1));
+        UI::render_digit(frame, sep, |context| drawer::sep(context, sep));
+        UI::render_digit(frame, digit3, |context| drawer::zero(context, digit1));
+        UI::render_digit(frame, digit4, |context| drawer::zero(context, digit1));
     }
 
-    fn render_digit(frame: &mut Frame, area: Rect, val: fn(&mut Context)) {
-        let block = Block::new().borders(Borders::ALL);
-
-        //println!("{} -- {}", area.width, area.height);
-
+    fn render_digit(frame: &mut Frame, area: Rect, val: impl Fn(&mut Context)) {
         let left: f64 = 0.0;
         let right: f64 = f64::from(area.width);
         let bottom: f64 = 0.0;
-        let top: f64 = f64::from(area.height).mul_add(2.0, -4.0);
+        let top: f64 = f64::from(area.height); //.mul_add(2.0, 0.0);
+        // println!("{} {}", right, top);
         let widget = Canvas::default()
-            .block(block)
-            //.marker(Marker::HalfBlock)
+            .block(Block::bordered())
+            .marker(Marker::HalfBlock)
             .x_bounds([left, right])
             .y_bounds([bottom, top])
             .paint(val);
