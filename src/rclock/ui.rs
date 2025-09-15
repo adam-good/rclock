@@ -1,5 +1,6 @@
 use crate::rclock::app;
 use crate::rclock::drawer;
+use chrono::Timelike;
 use ratatui::DefaultTerminal;
 use ratatui::Frame;
 use ratatui::layout::Constraint;
@@ -32,7 +33,7 @@ impl UI {
                 UI::render_right_widget(frame, right, app);
 
                 let (digit1, digit2, sep, digit3, digit4) = UI::clock_layout(top);
-                UI::render_clock(frame, digit1, digit2, sep, digit3, digit4);
+                UI::render_clock(frame, digit1, digit2, sep, digit3, digit4, app);
             })
             .expect("EEP");
     }
@@ -97,12 +98,24 @@ impl UI {
         sep: Rect,
         digit3: Rect,
         digit4: Rect,
+        app: &app::App,
     ) {
-        UI::render_digit(frame, digit1, drawer::eight);
-        UI::render_digit(frame, digit2, drawer::nine);
+        let h = app.base_time.hour();
+        let m = app.base_time.minute();
+        let (d1, d2) = UI::time_to_digit_fn(h);
+        let (d3, d4) = UI::time_to_digit_fn(m);
+        UI::render_digit(frame, digit1, d1);
+        UI::render_digit(frame, digit2, d2);
         UI::render_digit(frame, sep, drawer::sep);
-        UI::render_digit(frame, digit3, drawer::six);
-        UI::render_digit(frame, digit4, drawer::seven);
+        UI::render_digit(frame, digit3, d3);
+        UI::render_digit(frame, digit4, d4);
+    }
+
+    fn time_to_digit_fn(time_like: u32) -> (impl Fn(&mut Context), impl Fn(&mut Context)) {
+        let digit_fn_low = drawer::get(time_like % 10);
+        let digit_fn_high = drawer::get(time_like / 10);
+
+        (digit_fn_high, digit_fn_low)
     }
 
     fn render_digit(frame: &mut Frame, area: Rect, val: impl Fn(&mut Context)) {
