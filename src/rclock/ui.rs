@@ -28,7 +28,8 @@ impl UI {
         }
     }
 
-    pub fn shutdown(&self) {
+    pub fn shutdown(&self, app: &mut app::App) {
+        app.stop();
         ratatui::restore();
     }
 
@@ -46,7 +47,7 @@ impl UI {
             .expect("EEP");
     }
 
-    pub fn handle_events(&mut self) -> io::Result<()> {
+    pub fn handle_events(&mut self, app: &mut app::App) -> io::Result<()> {
         match event::poll(Duration::from_millis(10))? {
             false => return Ok(()),
             true => {}
@@ -54,16 +55,16 @@ impl UI {
 
         match event::read()? {
             Event::Key(key_event) if key_event.kind == KeyEventKind::Press => {
-                self.handle_key_event(key_event);
+                self.handle_key_event(key_event, app);
             }
             _ => {}
         }
         Ok(())
     }
 
-    fn handle_key_event(&mut self, key_event: KeyEvent) {
+    fn handle_key_event(&mut self, key_event: KeyEvent, app: &mut app::App) {
         match key_event.code {
-            KeyCode::Char('q') => self.shutdown(),
+            KeyCode::Char('q') => self.shutdown(app),
             _ => {}
         }
     }
