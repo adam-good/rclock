@@ -133,24 +133,8 @@ impl UI {
         frame.render_widget(widget, area);
     }
 
-    // TODO: Make this show current time
     fn render_top_widget(frame: &mut Frame, area: Rect, _app: &app::App) {
         let block = Block::new().borders(Borders::ALL);
-        //        let text = app.base_time.format("%H:%M:%S").to_string();
-        //        let widget = Paragraph::new(text).centered().block(block);
-        //        let left: f64 = 0.0;
-        //        let right: f64 = f64::from(area.width);
-        //        let bottom: f64 = 0.0;
-        //        let top = f64::from(area.height).mul_add(2.0, -4.0); // NOTE: Why the mul_add?
-        /*
-        let widget = Canvas::default()
-            .block(block)
-            .marker(ratatui::symbols::Marker::HalfBlock)
-            .x_bounds([left, right])
-            .y_bounds([bottom, top])
-            .paint(drawer::zero);
-        */
-
         frame.render_widget(block, area);
     }
 
@@ -164,7 +148,12 @@ impl UI {
     // TODO: Make this show a progress bar
     fn render_right_widget(frame: &mut Frame, area: Rect, app: &app::App) {
         let block = Block::new().borders(Borders::ALL);
-        let msg = app.base_time.format("%H:%M:%S").to_string();
+        //let msg = app.base_time.format("%H:%M:%S").to_string();
+        let msg = match app.get_primary_timer() {
+            Some(t) => t.time().format("%H:%M:%S").to_string(),
+            None => String::from("00:00:00"),
+        };
+
         frame.render_widget(Paragraph::new(msg).block(block), area);
     }
 

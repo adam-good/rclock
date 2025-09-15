@@ -8,6 +8,7 @@ use crate::rclock::timer;
 
 pub struct App {
     pub base_time: DateTime<Local>,
+    primary_timer_idx: Option<usize>,
     timers: Vec<timer::Timer>,
 }
 
@@ -15,6 +16,7 @@ impl App {
     pub fn new() -> Self {
         App {
             base_time: Local::now(),
+            primary_timer_idx: None,
             timers: Vec::<timer::Timer>::new(),
         }
     }
@@ -30,7 +32,18 @@ impl App {
             t.update();
         }
 
+        if self.primary_timer_idx.is_none() && !self.timers.is_empty() {
+            self.primary_timer_idx = Some(0);
+        }
+
         Ok(())
+    }
+
+    pub fn get_primary_timer(&self) -> Option<&timer::Timer> {
+        match self.primary_timer_idx {
+            Some(i) => self.timers.get(i),
+            None => None,
+        }
     }
 }
 

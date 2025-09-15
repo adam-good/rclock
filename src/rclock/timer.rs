@@ -21,6 +21,10 @@ impl Timer {
 
         self.offset = new_offset;
     }
+
+    pub fn time(&self) -> DateTime<Utc> {
+        DateTime::<Utc>::default() + self.offset
+    }
 }
 
 impl fmt::Display for Timer {
