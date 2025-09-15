@@ -191,9 +191,9 @@ fn six(context: &mut Context) {
         color: Color::Green,
     });
     context.draw(&Line {
-        x1: 5.0,
+        x1: 0.0,
         y1: 0.0,
-        x2: 5.0,
+        x2: 0.0,
         y2: 5.0,
         color: Color::Green,
     });
