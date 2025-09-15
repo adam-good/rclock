@@ -54,12 +54,15 @@ impl UI {
     }
 
     fn clock_layout(area: Rect) -> (Rect, Rect, Rect, Rect, Rect) {
+        let digit_height: u16 = 5;
+        let digit_width: u16 = 5;
+
         let vert_split = Layout::default()
             .direction(Direction::Vertical)
             .constraints(vec![
-                Constraint::Percentage(15),
-                Constraint::Percentage(50),
-                Constraint::Percentage(15),
+                Constraint::Fill(1),
+                Constraint::Length(digit_height),
+                Constraint::Fill(1),
             ])
             .split(area);
         let middle = vert_split[1];
@@ -67,13 +70,13 @@ impl UI {
         let horz_split = Layout::default()
             .direction(Direction::Horizontal)
             .constraints(vec![
-                Constraint::Percentage(15),
-                Constraint::Percentage(14),
-                Constraint::Percentage(14),
-                Constraint::Percentage(14),
-                Constraint::Percentage(14),
-                Constraint::Percentage(14),
-                Constraint::Percentage(15),
+                Constraint::Fill(1), //Percentage(15),
+                Constraint::Length(digit_width),
+                Constraint::Length(digit_width),
+                Constraint::Length(digit_width),
+                Constraint::Length(digit_width),
+                Constraint::Length(digit_width),
+                Constraint::Fill(1),
             ])
             .split(middle);
         let (digit1, digit2, sep, digit3, digit4) = (
@@ -95,22 +98,21 @@ impl UI {
         digit3: Rect,
         digit4: Rect,
     ) {
-        UI::render_digit(frame, digit1, |context| drawer::zero(context, digit1));
-        UI::render_digit(frame, digit2, |context| drawer::zero(context, digit1));
-        UI::render_digit(frame, sep, |context| drawer::sep(context, sep));
-        UI::render_digit(frame, digit3, |context| drawer::zero(context, digit1));
-        UI::render_digit(frame, digit4, |context| drawer::zero(context, digit1));
+        UI::render_digit(frame, digit1, drawer::zero);
+        UI::render_digit(frame, digit2, drawer::zero);
+        UI::render_digit(frame, sep, drawer::sep);
+        UI::render_digit(frame, digit3, drawer::zero);
+        UI::render_digit(frame, digit4, drawer::zero);
     }
 
     fn render_digit(frame: &mut Frame, area: Rect, val: impl Fn(&mut Context)) {
         let left: f64 = 0.0;
         let right: f64 = f64::from(area.width);
         let bottom: f64 = 0.0;
-        let top: f64 = f64::from(area.height); //.mul_add(2.0, 0.0);
-        // println!("{} {}", right, top);
+        let top: f64 = f64::from(area.height);
         let widget = Canvas::default()
-            .block(Block::bordered())
-            .marker(Marker::HalfBlock)
+            //.block(Block::bordered())
+            .marker(Marker::Block)
             .x_bounds([left, right])
             .y_bounds([bottom, top])
             .paint(val);
