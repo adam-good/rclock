@@ -1,6 +1,7 @@
 use crate::rclock::app;
 use crate::rclock::drawer;
 use chrono::Timelike;
+use crossterm::event::{self, Event, KeyCode, KeyEvent, KeyEventKind};
 use ratatui::DefaultTerminal;
 use ratatui::Frame;
 use ratatui::layout::Constraint;
@@ -13,6 +14,8 @@ use ratatui::widgets::Borders;
 use ratatui::widgets::Paragraph;
 use ratatui::widgets::canvas::Canvas;
 use ratatui::widgets::canvas::Context;
+use std::io;
+use std::time::Duration;
 
 pub struct UI {
     terminal: DefaultTerminal,
@@ -41,6 +44,28 @@ impl UI {
                 UI::render_clock(frame, digit1, digit2, sep, digit3, digit4, app);
             })
             .expect("EEP");
+    }
+
+    pub fn handle_events(&mut self) -> io::Result<()> {
+        match event::poll(Duration::from_millis(10))? {
+            false => return Ok(()),
+            true => {}
+        }
+
+        match event::read()? {
+            Event::Key(key_event) if key_event.kind == KeyEventKind::Press => {
+                self.handle_key_event(key_event);
+            }
+            _ => {}
+        }
+        Ok(())
+    }
+
+    fn handle_key_event(&mut self, key_event: KeyEvent) {
+        match key_event.code {
+            KeyCode::Char('q') => self.shutdown(),
+            _ => {}
+        }
     }
 
     fn partition_layout(frame: &mut Frame) -> (Rect, Rect, Rect) {

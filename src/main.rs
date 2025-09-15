@@ -14,9 +14,10 @@ fn main() {
     app.new_timer().unwrap();
 
     let mut i = 0;
-    while i < 60 {
+    while i < 10 {
         app.update().expect("FUCK");
         app_ui.view(&app);
+        app_ui.handle_events().expect("UH OH");
         sleep(1);
         i = i + 1;
     }
