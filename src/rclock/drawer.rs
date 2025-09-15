@@ -1,13 +1,15 @@
-use ratatui::layout::Rect;
+use color_eyre::owo_colors::colors::Green;
 use ratatui::style::Color;
 use ratatui::widgets::canvas::Points;
 use ratatui::widgets::canvas::{Context, Line, Rectangle};
 
 pub fn sep(context: &mut Context) {
+    /*
     context.draw(&Points {
         coords: &[(0.0, 0.0), (5.0, 5.0)],
         color: Color::Red,
     });
+    */
 
     context.draw(&Points {
         coords: &[(2.0, 1.0), (3.0, 1.0), (2.0, 3.0), (3.0, 3.0)],
@@ -19,8 +21,252 @@ pub fn zero(context: &mut Context) {
     context.draw(&Rectangle {
         x: 0.0,
         y: 0.0,
-        width: 4.0,
-        height: 4.0,
+        width: 5.0,
+        height: 5.0,
+        color: Color::Green,
+    });
+}
+
+pub fn one(context: &mut Context) {
+    context.draw(&Line {
+        x1: 5.0,
+        y1: 0.0,
+        x2: 5.0,
+        y2: 5.0,
+        color: Color::Green,
+    });
+}
+
+pub fn two(context: &mut Context) {
+    context.draw(&Line {
+        x1: 0.0,
+        y1: 5.0,
+        x2: 5.0,
+        y2: 5.0,
+        color: Color::Green,
+    });
+    context.draw(&Line {
+        x1: 5.0,
+        y1: 5.0,
+        x2: 5.0,
+        y2: 2.0,
+        color: Color::Green,
+    });
+    context.draw(&Line {
+        x1: 5.0,
+        y1: 2.0,
+        x2: 0.0,
+        y2: 2.0,
+        color: Color::Green,
+    });
+    context.draw(&Line {
+        x1: 0.0,
+        y1: 2.0,
+        x2: 0.0,
+        y2: 0.0,
+        color: Color::Green,
+    });
+    context.draw(&Line {
+        x1: 0.0,
+        y1: 0.0,
+        x2: 5.0,
+        y2: 0.0,
+        color: Color::Green,
+    });
+}
+
+pub fn three(context: &mut Context) {
+    context.draw(&Line {
+        x1: 5.0,
+        y1: 5.0,
+        x2: 5.0,
+        y2: 0.0,
+        color: Color::Green,
+    });
+    context.draw(&Line {
+        x1: 0.0,
+        y1: 5.0,
+        x2: 5.0,
+        y2: 5.0,
+        color: Color::Green,
+    });
+    context.draw(&Line {
+        x1: 0.0,
+        y1: 2.0,
+        x2: 5.0,
+        y2: 2.0,
+        color: Color::Green,
+    });
+    context.draw(&Line {
+        x1: 0.0,
+        y1: 0.0,
+        x2: 5.0,
+        y2: 0.0,
+        color: Color::Green,
+    });
+}
+
+pub fn four(context: &mut Context) {
+    context.draw(&Line {
+        x1: 0.0,
+        y1: 5.0,
+        x2: 0.0,
+        y2: 2.0,
+        color: Color::Green,
+    });
+    context.draw(&Line {
+        x1: 5.0,
+        y1: 5.0,
+        x2: 5.0,
+        y2: 0.0,
+        color: Color::Green,
+    });
+    context.draw(&Line {
+        x1: 0.0,
+        y1: 2.0,
+        x2: 5.0,
+        y2: 2.0,
+        color: Color::Green,
+    });
+}
+
+pub fn five(context: &mut Context) {
+    context.draw(&Line {
+        x1: 0.0,
+        y1: 5.0,
+        x2: 5.0,
+        y2: 5.0,
+        color: Color::Green,
+    });
+    context.draw(&Line {
+        x1: 0.0,
+        y1: 5.0,
+        x2: 0.0,
+        y2: 2.0,
+        color: Color::Green,
+    });
+    context.draw(&Line {
+        x1: 5.0,
+        y1: 2.0,
+        x2: 0.0,
+        y2: 2.0,
+        color: Color::Green,
+    });
+    context.draw(&Line {
+        x1: 5.0,
+        y1: 2.0,
+        x2: 5.0,
+        y2: 0.0,
+        color: Color::Green,
+    });
+    context.draw(&Line {
+        x1: 0.0,
+        y1: 0.0,
+        x2: 5.0,
+        y2: 0.0,
+        color: Color::Green,
+    });
+}
+
+pub fn six(context: &mut Context) {
+    context.draw(&Rectangle {
+        x: 0.0,
+        y: 0.0,
+        width: 5.0,
+        height: 2.0,
+        color: Color::Green,
+    });
+    context.draw(&Line {
+        x1: 5.0,
+        y1: 0.0,
+        x2: 5.0,
+        y2: 5.0,
+        color: Color::Green,
+    });
+    context.draw(&Line {
+        x1: 5.0,
+        y1: 5.0,
+        x2: 0.0,
+        y2: 5.0,
+        color: Color::Green,
+    });
+}
+
+pub fn seven(context: &mut Context) {
+    context.draw(&Line {
+        x1: 5.0,
+        y1: 5.0,
+        x2: 5.0,
+        y2: 0.0,
+        color: Color::Green,
+    });
+    context.draw(&Line {
+        x1: 0.0,
+        y1: 5.0,
+        x2: 5.0,
+        y2: 5.0,
+        color: Color::Green,
+    });
+}
+
+pub fn eight(context: &mut Context) {
+    context.draw(&Line {
+        x1: 5.0,
+        y1: 5.0,
+        x2: 5.0,
+        y2: 0.0,
+        color: Color::Green,
+    });
+    context.draw(&Line {
+        x1: 0.0,
+        y1: 5.0,
+        x2: 5.0,
+        y2: 5.0,
+        color: Color::Green,
+    });
+    context.draw(&Line {
+        x1: 0.0,
+        y1: 2.0,
+        x2: 5.0,
+        y2: 2.0,
+        color: Color::Green,
+    });
+    context.draw(&Line {
+        x1: 0.0,
+        y1: 0.0,
+        x2: 5.0,
+        y2: 0.0,
+        color: Color::Green,
+    });
+    context.draw(&Line {
+        x1: 0.0,
+        y1: 0.0,
+        x2: 0.0,
+        y2: 5.0,
+        color: Color::Green,
+    });
+}
+
+pub fn nine(context: &mut Context) {
+    context.draw(&Line {
+        x1: 5.0,
+        y1: 0.0,
+        x2: 5.0,
+        y2: 5.0,
+        color: Color::Green,
+    });
+    context.draw(&Rectangle {
+        x: 0.0,
+        y: 2.0,
+        width: 5.0,
+        height: 2.0,
+        color: Color::Green,
+    });
+    context.draw(&Line {
+        x1: 0.0,
+        y1: 0.0,
+        x2: 5.0,
+        y2: 0.0,
         color: Color::Green,
     });
 }

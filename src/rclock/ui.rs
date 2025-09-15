@@ -55,7 +55,7 @@ impl UI {
 
     fn clock_layout(area: Rect) -> (Rect, Rect, Rect, Rect, Rect) {
         let digit_height: u16 = 5;
-        let digit_width: u16 = 5;
+        let digit_width: u16 = 6;
 
         let vert_split = Layout::default()
             .direction(Direction::Vertical)
@@ -98,11 +98,11 @@ impl UI {
         digit3: Rect,
         digit4: Rect,
     ) {
-        UI::render_digit(frame, digit1, drawer::zero);
-        UI::render_digit(frame, digit2, drawer::zero);
+        UI::render_digit(frame, digit1, drawer::eight);
+        UI::render_digit(frame, digit2, drawer::nine);
         UI::render_digit(frame, sep, drawer::sep);
-        UI::render_digit(frame, digit3, drawer::zero);
-        UI::render_digit(frame, digit4, drawer::zero);
+        UI::render_digit(frame, digit3, drawer::six);
+        UI::render_digit(frame, digit4, drawer::seven);
     }
 
     fn render_digit(frame: &mut Frame, area: Rect, val: impl Fn(&mut Context)) {
