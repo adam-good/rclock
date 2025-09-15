@@ -17,6 +17,7 @@ use ratatui::widgets::canvas::Context;
 pub struct UI {
     terminal: DefaultTerminal,
 }
+
 impl UI {
     pub fn new() -> Self {
         UI {
@@ -24,21 +25,25 @@ impl UI {
         }
     }
 
+    pub fn shutdown(&self) {
+        ratatui::restore();
+    }
+
     pub fn view(&mut self, app: &app::App) {
         self.terminal
             .draw(|frame| {
-                let (top, left, right) = UI::layout(frame);
+                let (top, left, right) = UI::partition_layout(frame);
                 UI::render_top_widget(frame, top, app);
                 UI::render_left_widget(frame, left, app);
                 UI::render_right_widget(frame, right, app);
 
-                let (digit1, digit2, sep, digit3, digit4) = UI::clock_layout(top);
+                let (digit1, digit2, sep, digit3, digit4) = UI::partition_clock_layout(top);
                 UI::render_clock(frame, digit1, digit2, sep, digit3, digit4, app);
             })
             .expect("EEP");
     }
 
-    fn layout(frame: &mut Frame) -> (Rect, Rect, Rect) {
+    fn partition_layout(frame: &mut Frame) -> (Rect, Rect, Rect) {
         let outer_layout = Layout::default()
             .direction(Direction::Vertical)
             .constraints(vec![Constraint::Percentage(75), Constraint::Percentage(25)])
@@ -54,7 +59,7 @@ impl UI {
         (top, left, right)
     }
 
-    fn clock_layout(area: Rect) -> (Rect, Rect, Rect, Rect, Rect) {
+    fn partition_clock_layout(area: Rect) -> (Rect, Rect, Rect, Rect, Rect) {
         let digit_height: u16 = 5;
         let digit_width: u16 = 6;
 

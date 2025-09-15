@@ -11,7 +11,6 @@ fn sleep(n: u64) {
 fn main() {
     let mut app: app::App = app::App::new();
     let mut app_ui: ui::UI = ui::UI::new();
-
     app.new_timer().unwrap();
 
     let mut i = 0;
@@ -22,15 +21,6 @@ fn main() {
         i = i + 1;
     }
 
-    ratatui::restore();
-
-    /*
-        let mut i = 0;
-        while i < 60 {
-            app.update().unwrap();
-            println!("{}", app);
-            i = i + 1;
-            sleep(1);
-        }
-    */
+    app_ui.shutdown();
+    //ratatui::restore();
 }
