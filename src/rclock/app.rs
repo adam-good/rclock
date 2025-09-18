@@ -42,8 +42,10 @@ impl App {
         self.state == AppState::Running
     }
 
-    pub fn new_timer(&mut self) -> io::Result<()> {
-        self.timers.push(timer::Timer::new(Local::now()));
+    pub fn new_timer(&mut self, mins: i64, secs: i64) -> io::Result<()> {
+        let timer = timer::Timer::from(mins, secs);
+        self.timers.push(timer);
+
         Ok(())
     }
 

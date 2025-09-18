@@ -6,33 +6,40 @@ use chrono::Utc;
 use std::fmt;
 
 pub struct Timer {
-    start_time: DateTime<Local>,
-    offset: TimeDelta,
+    last_update: DateTime<Local>,
+    target: TimeDelta,
 }
+
 impl Timer {
-    pub fn new(start: DateTime<Local>) -> Self {
+    pub fn new(target: TimeDelta) -> Self {
         Timer {
-            start_time: start,
-            offset: TimeDelta::new(0, 0).unwrap(),
+            last_update: Local::now(),
+            target: target,
         }
     }
-    pub fn update(&mut self) {
-        let new_offset = Local::now() - self.start_time;
 
-        self.offset = new_offset;
+    pub fn from(mins: i64, secs: i64) -> Self {
+        let delta = match TimeDelta::new(mins * 60 + secs, 0) {
+            Some(t) => t,
+            None => panic!("Invalid Timer Input {mins}:{secs}"),
+        };
+        Timer::new(delta)
+    }
+
+    pub fn update(&mut self) {
+        let update_time: DateTime<Local> = Local::now();
+        let offset: TimeDelta = update_time - self.last_update;
+        self.target = self.target - offset;
+        self.last_update = update_time;
     }
 
     pub fn time(&self) -> DateTime<Utc> {
-        DateTime::<Utc>::default() + self.offset
+        DateTime::<Utc>::default() + self.target
     }
 }
 
 impl fmt::Display for Timer {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(
-            f,
-            "{}",
-            (DateTime::<Utc>::default() + self.offset).format("%H:%M:%S")
-        )
+        write!(f, "{}", (self.time().format("%H:%M:%S")))
     }
 }
