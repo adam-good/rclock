@@ -5,12 +5,13 @@ use std::io;
 use std::fmt;
 use std::io::Error;
 
+use crate::rclock::pomodoro;
+use crate::rclock::pomodoro::Pomodoro;
 use crate::rclock::timer;
 
 pub struct App {
     pub base_time: DateTime<Local>,
-    primary_timer_idx: Option<usize>,
-    timers: Vec<timer::Timer>,
+    pomodoro: Option<pomodoro::Pomodoro>,
     state: AppState,
 }
 
@@ -24,8 +25,7 @@ impl App {
     pub fn new() -> Self {
         App {
             base_time: Local::now(),
-            primary_timer_idx: None,
-            timers: Vec::<timer::Timer>::new(),
+            pomodoro: None,
             state: AppState::Stopped,
         }
     }
@@ -42,11 +42,8 @@ impl App {
         self.state == AppState::Running
     }
 
-    pub fn new_timer(&mut self, mins: i64, secs: i64) -> io::Result<()> {
-        let timer = timer::Timer::from(mins, secs);
-        self.timers.push(timer);
-
-        Ok(())
+    pub fn new_pomodoro(&mut self, work_mins: i64, short_break_mins: i64, long_break_mins: i64) {
+        self.pomodoro = Some(Pomodoro::new(work_mins, short_break_mins, long_break_mins));
     }
 
     pub fn update(&mut self) -> io::Result<()> {
@@ -56,20 +53,26 @@ impl App {
         }
 
         self.base_time = Local::now();
-        for t in &mut self.timers {
-            t.update();
-        }
 
-        if self.primary_timer_idx.is_none() && !self.timers.is_empty() {
-            self.primary_timer_idx = Some(0);
-        }
+        // TODO: Pretty sure there's better syntax for this but I'm blanking right now
+        match &mut self.pomodoro {
+            Some(p) => p.update(),
+            None => {}
+        };
 
         Ok(())
     }
 
-    pub fn get_primary_timer(&self) -> Option<&timer::Timer> {
-        match self.primary_timer_idx {
-            Some(i) => self.timers.get(i),
+    pub fn get_pomodoro_timer(&self) -> Option<&timer::Timer> {
+        match &self.pomodoro {
+            Some(p) => Some(p.get_timer()),
+            None => None,
+        }
+    }
+
+    pub fn get_pomodoro_round(&self) -> Option<i32> {
+        match &self.pomodoro {
+            Some(p) => Some(p.get_round()),
             None => None,
         }
     }
@@ -80,13 +83,20 @@ impl fmt::Display for App {
         match write!(f, "{}\n", self.base_time.format("%H:%M")) {
             Ok(v) => v,
             Err(_e) => panic!("Error Displaying App"),
+        };
+
+        match &self.pomodoro {
+            Some(p) => match write!(f, "{}", p) {
+                Ok(_v) => {}
+                Err(_e) => panic!("Error Displaying App"),
+            },
+            None => match write!(f, "Pomodoro Uninitialized\n") {
+                Ok(_v) => {}
+                Err(_e) => {}
+            },
         }
-        for t in &self.timers {
-            match write!(f, "  {}\n", t) {
-                Ok(v) => v,
-                Err(_e) => panic!("Error Displaying Timer"),
-            }
-        }
+
+        {}
         Ok(())
     }
 }

@@ -1,5 +1,6 @@
 use crate::rclock::timer;
 use chrono::TimeDelta;
+use std::fmt;
 
 pub struct Pomodoro {
     timer: timer::Timer,
@@ -25,5 +26,36 @@ impl Pomodoro {
             long_break_time: break_delta2,
             round_counter: 0,
         }
+    }
+
+    pub fn get_timer(&self) -> &timer::Timer {
+        &self.timer
+    }
+
+    pub fn get_round(&self) -> i32 {
+        self.round_counter
+    }
+
+    pub fn update(&mut self) {
+        self.timer.update();
+    }
+}
+
+impl fmt::Display for Pomodoro {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match write!(
+            f,
+            "{{timer: {}\nwork: {}\nbreak1: {}\nbreak2: {}\nround: {}}}",
+            self.timer,
+            self.work_time,
+            self.short_break_time,
+            self.long_break_time,
+            self.round_counter
+        ) {
+            Ok(_v) => {}
+            Err(_e) => panic!("Error Printing Pomodoro"),
+        };
+
+        Ok(())
     }
 }

@@ -18,6 +18,7 @@ impl Timer {
         }
     }
 
+    /*
     pub fn from(mins: i64, secs: i64) -> Self {
         let delta = match TimeDelta::new(mins * 60 + secs, 0) {
             Some(t) => t,
@@ -25,6 +26,7 @@ impl Timer {
         };
         Timer::new(delta)
     }
+    */
 
     pub fn update(&mut self) {
         let update_time: DateTime<Local> = Local::now();

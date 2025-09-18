@@ -172,7 +172,11 @@ impl UI {
     // TODO: Make this show a timer
     fn render_left_widget(frame: &mut Frame, area: Rect, app: &app::App) {
         let block = Block::new().borders(Borders::ALL);
-        let msg = app.base_time.format("%H:%M:%S").to_string();
+        let pomodoro_round_str = match app.get_pomodoro_round() {
+            Some(r) => r.to_string(),
+            None => "None".to_string(),
+        };
+        let msg = format!("Round: {}", pomodoro_round_str);
         frame.render_widget(Paragraph::new(msg).block(block), area);
     }
 
@@ -180,7 +184,7 @@ impl UI {
     fn render_right_widget(frame: &mut Frame, area: Rect, app: &app::App) {
         let block = Block::new().borders(Borders::ALL);
         //let msg = app.base_time.format("%H:%M:%S").to_string();
-        let msg = match app.get_primary_timer() {
+        let msg = match app.get_pomodoro_timer() {
             Some(t) => t.time().format("%H:%M:%S").to_string(),
             None => String::from("00:00:00"),
         };
