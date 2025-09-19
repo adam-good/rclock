@@ -32,10 +32,16 @@ impl App {
 
     pub fn run(&mut self) {
         self.state = AppState::Running;
+        if let Some(p) = &mut self.pomodoro {
+            p.run();
+        }
     }
 
     pub fn stop(&mut self) {
         self.state = AppState::Stopped;
+        if let Some(p) = &mut self.pomodoro {
+            p.pause();
+        }
     }
 
     pub fn is_running(&mut self) -> bool {

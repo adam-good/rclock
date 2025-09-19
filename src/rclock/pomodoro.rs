@@ -1,5 +1,7 @@
 use crate::rclock::timer;
+use chrono::DateTime;
 use chrono::TimeDelta;
+use chrono::Utc;
 use std::fmt;
 
 pub struct Pomodoro {
@@ -28,6 +30,14 @@ impl Pomodoro {
         }
     }
 
+    pub fn run(&mut self) {
+        self.timer.run();
+    }
+
+    pub fn pause(&mut self) {
+        self.timer.pause();
+    }
+
     pub fn get_timer(&self) -> &timer::Timer {
         &self.timer
     }
@@ -37,7 +47,13 @@ impl Pomodoro {
     }
 
     pub fn update(&mut self) {
-        self.timer.update();
+        // TODO: Handle this result!
+        let _ = self.timer.update();
+        if self.timer.time() - DateTime::<Utc>::default() < TimeDelta::new(0, 1000000).unwrap() {
+            self.round_counter = self.round_counter + 1;
+            self.timer = timer::Timer::new(self.short_break_time);
+            self.timer.run();
+        }
     }
 }
 

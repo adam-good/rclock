@@ -4,10 +4,18 @@ use chrono::TimeDelta;
 use chrono::Utc;
 
 use std::fmt;
+use std::io;
 
 pub struct Timer {
     last_update: DateTime<Local>,
     target: TimeDelta,
+    state: TimerState,
+}
+
+#[derive(Eq, PartialEq)]
+enum TimerState {
+    Running,
+    Paused,
 }
 
 impl Timer {
@@ -15,6 +23,7 @@ impl Timer {
         Timer {
             last_update: Local::now(),
             target: target,
+            state: TimerState::Paused,
         }
     }
 
@@ -28,11 +37,26 @@ impl Timer {
     }
     */
 
-    pub fn update(&mut self) {
-        let update_time: DateTime<Local> = Local::now();
-        let offset: TimeDelta = update_time - self.last_update;
-        self.target = self.target - offset;
-        self.last_update = update_time;
+    pub fn run(&mut self) {
+        self.state = TimerState::Running;
+    }
+
+    pub fn pause(&mut self) {
+        self.state = TimerState::Paused;
+    }
+
+    pub fn update(&mut self) -> io::Result<()> {
+        // TODO: Is there better syntax for this?
+        match self.state {
+            TimerState::Running => {
+                let update_time: DateTime<Local> = Local::now();
+                let offset: TimeDelta = update_time - self.last_update;
+                self.target = self.target - offset;
+                self.last_update = update_time;
+                Ok(())
+            }
+            TimerState::Paused => Ok(()),
+        }
     }
 
     pub fn time(&self) -> DateTime<Utc> {
