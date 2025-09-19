@@ -12,7 +12,7 @@ fn main() {
     let mut app: app::App = app::App::new();
     let mut app_ui: ui::UI = ui::UI::new();
 
-    app.new_pomodoro(1, 2, 2);
+    app.new_pomodoro(3, 1, 2);
     app.run();
 
     let mut i = 0;
