@@ -9,6 +9,7 @@ use std::io;
 pub struct Timer {
     last_update: DateTime<Local>,
     target: TimeDelta,
+    delta: TimeDelta,
     state: TimerState,
 }
 
@@ -23,6 +24,7 @@ impl Timer {
         Timer {
             last_update: Local::now(),
             target: target,
+            delta: target,
             state: TimerState::Paused,
         }
     }
@@ -52,7 +54,7 @@ impl Timer {
             TimerState::Running => {
                 let update_time: DateTime<Local> = Local::now();
                 let offset: TimeDelta = update_time - self.last_update;
-                self.target = self.target - offset;
+                self.delta = self.delta - offset;
                 self.last_update = update_time;
                 Ok(())
             }
@@ -61,7 +63,14 @@ impl Timer {
     }
 
     pub fn time(&self) -> DateTime<Utc> {
-        DateTime::<Utc>::default() + self.target
+        DateTime::<Utc>::default() + self.delta
+    }
+
+    pub fn get_perc(&self) -> f32 {
+        let delta = self.delta.as_seconds_f32();
+        let target = self.target.as_seconds_f32();
+
+        (1.0 - (delta / target)) * 100.0
     }
 }
 

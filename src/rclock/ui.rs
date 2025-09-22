@@ -8,9 +8,11 @@ use ratatui::layout::Constraint;
 use ratatui::layout::Direction;
 use ratatui::layout::Layout;
 use ratatui::layout::Rect;
+use ratatui::style::Color;
 use ratatui::symbols::Marker;
 use ratatui::widgets::Block;
 use ratatui::widgets::Borders;
+use ratatui::widgets::Gauge;
 use ratatui::widgets::Paragraph;
 use ratatui::widgets::canvas::Canvas;
 use ratatui::widgets::canvas::Context;
@@ -177,6 +179,8 @@ impl UI {
     // TODO: Make this show a timer
     fn render_left_widget(frame: &mut Frame, area: Rect, app: &app::App) {
         let block = Block::new().borders(Borders::ALL);
+
+        // TODO: Better syntax??
         let pomodoro_round_str = match app.get_pomodoro_round() {
             Some(r) => r.to_string(),
             None => "None".to_string(),
@@ -202,13 +206,16 @@ impl UI {
     // TODO: Make this show a progress bar
     fn render_right_widget(frame: &mut Frame, area: Rect, app: &app::App) {
         let block = Block::new().borders(Borders::ALL);
-        //let msg = app.base_time.format("%H:%M:%S").to_string();
-        let msg = match app.get_pomodoro_timer() {
-            Some(t) => t.time().format("%H:%M:%S").to_string(),
-            None => String::from("00:00:00"),
-        };
 
-        frame.render_widget(Paragraph::new(msg).block(block), area);
+        let perc = app
+            .get_pomodoro_timer()
+            .map_or(0.0, |t| t.get_perc().floor());
+        let gauge = Gauge::default()
+            .block(block)
+            .gauge_style(Color::Green)
+            .percent(perc as u16);
+
+        frame.render_widget(gauge, area);
     }
 
     /*
