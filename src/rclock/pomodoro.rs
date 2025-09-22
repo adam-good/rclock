@@ -152,15 +152,7 @@ impl fmt::Display for Pomodoro {
             Some(t) => t.to_string(),
             None => "None".to_string(),
         };
-        match write!(
-            f,
-            "{{timer: {}\nround: {}}}",
-            timer_str,
-            //            self.work_time,
-            //            self.short_break_time,
-            //           self.long_break_time,
-            self.round_counter
-        ) {
+        match write!(f, "{{timer: {}\nround: {}}}", timer_str, self.round_counter) {
             Ok(_v) => {}
             Err(_e) => panic!("Error Printing Pomodoro"),
         };

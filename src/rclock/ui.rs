@@ -210,7 +210,6 @@ impl UI {
         frame.render_widget(Paragraph::new(msg).block(block), area);
     }
 
-    // TODO: Make this show a progress bar
     fn render_right_widget(frame: &mut Frame, area: Rect, app: &app::App) {
         let block = Block::new().borders(Borders::ALL);
 
@@ -226,15 +225,4 @@ impl UI {
 
         frame.render_widget(gauge, area);
     }
-
-    /*
-        fn center_area(area: Rect, horizontal: Constraint, vertical: Constraint) -> Rect {
-            let [area] = Layout::horizontal([horizontal])
-                .flex(Flex::Center)
-                .areas(area);
-            let [area] = Layout::vertical([vertical]).flex(Flex::Center).areas(area);
-
-            area
-        }
-    */
 }

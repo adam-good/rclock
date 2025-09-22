@@ -7,9 +7,6 @@ use std::io::Error;
 
 use crate::rclock::pomodoro;
 use crate::rclock::pomodoro::Pomodoro;
-use crate::rclock::pomodoro::PomodoroState;
-use crate::rclock::pomodoro::TimerIntent;
-use crate::rclock::timer;
 
 pub struct App {
     pub base_time: DateTime<Local>,

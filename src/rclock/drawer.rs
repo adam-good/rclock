@@ -18,13 +18,6 @@ pub fn get(val: u32) -> impl Fn(&mut Context) {
     }
 }
 pub fn sep(context: &mut Context) {
-    /*
-    context.draw(&Points {
-        coords: &[(0.0, 0.0), (5.0, 5.0)],
-        color: Color::Red,
-    });
-    */
-
     context.draw(&Points {
         coords: &[(2.0, 1.0), (3.0, 1.0), (2.0, 3.0), (3.0, 3.0)],
         color: Color::Green,
