@@ -94,30 +94,9 @@ impl App {
         Ok(())
     }
 
-    pub fn get_pomodoro_timer(&self) -> Option<&timer::Timer> {
+    pub fn get_pomodoro(&self) -> Option<&Pomodoro> {
         match &self.pomodoro {
-            Some(p) => Some(p.get_timer()),
-            None => None,
-        }
-    }
-
-    pub fn get_pomodoro_round(&self) -> Option<i32> {
-        match &self.pomodoro {
-            Some(p) => Some(p.get_round()),
-            None => None,
-        }
-    }
-
-    pub fn get_pomodoro_state(&self) -> Option<&PomodoroState> {
-        match &self.pomodoro {
-            Some(p) => Some(p.get_state()),
-            None => None,
-        }
-    }
-
-    pub fn get_pomodoro_timer_intent(&self) -> Option<&TimerIntent> {
-        match &self.pomodoro {
-            Some(p) => Some(p.get_intent()),
+            Some(p) => Some(&p),
             None => None,
         }
     }

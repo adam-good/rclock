@@ -1,5 +1,6 @@
 use crate::rclock::app;
 use crate::rclock::drawer;
+use crate::rclock::pomodoro::Pomodoro;
 use crate::rclock::pomodoro::PomodoroState;
 use crate::rclock::pomodoro::TimerIntent;
 use chrono::Timelike;
@@ -175,28 +176,33 @@ impl UI {
     fn render_left_widget(frame: &mut Frame, area: Rect, app: &app::App) {
         let block = Block::new().borders(Borders::ALL);
 
+        let pomodoro: Option<&Pomodoro> = app.get_pomodoro();
+
+        let default = "None";
+        let pomodoro_round_str: String = pomodoro
+            .map(|p: &Pomodoro| -> String { p.get_round().to_string() })
+            .unwrap_or(String::from(default));
+        let pomodoro_timer_str: String = pomodoro
+            .map(|p: &Pomodoro| -> String { p.get_timer().time().format("%H:%M:%S").to_string() })
+            .unwrap_or(String::from(default));
+        let pomodoro_state_str: String = pomodoro
+            .map(|p: &Pomodoro| -> String {
+                match p.get_state() {
+                    PomodoroState::Running => "Running".to_string(),
+                    PomodoroState::Paused => "Paused".to_string(),
+                }
+            })
+            .unwrap_or(String::from(default));
+        let timer_intent_str: String = pomodoro
+            .map(|p: &Pomodoro| -> String {
+                match p.get_intent() {
+                    TimerIntent::Work => "Work".to_string(),
+                    TimerIntent::Break => "Break".to_string(),
+                }
+            })
+            .unwrap_or(String::from(default));
+
         // TODO: Better syntax??
-        let pomodoro_round_str: String = app
-            .get_pomodoro_round()
-            .map_or("None".to_string(), |r| r.to_string());
-        let pomodoro_timer_str = app
-            .get_pomodoro_timer()
-            .map(|t| t.time().format("%H:%M:%S").to_string())
-            .unwrap_or("None".to_string());
-        let pomodoro_state_str = app
-            .get_pomodoro_state()
-            .map(|s| match s {
-                PomodoroState::Running => "Running",
-                PomodoroState::Paused => "Paused",
-            })
-            .unwrap_or("None");
-        let timer_intent_str = app
-            .get_pomodoro_timer_intent()
-            .map(|i| match i {
-                TimerIntent::Work => "Work",
-                TimerIntent::Break => "Break",
-            })
-            .unwrap_or("None");
         let msg = format!(
             "Round: {}\n{}\n{}\n{}",
             pomodoro_round_str, pomodoro_timer_str, pomodoro_state_str, timer_intent_str
@@ -209,8 +215,10 @@ impl UI {
         let block = Block::new().borders(Borders::ALL);
 
         let perc = app
-            .get_pomodoro_timer()
-            .map_or(0.0, |t| t.get_perc().floor());
+            .get_pomodoro()
+            .map(|p: &Pomodoro| p.get_timer().get_perc().floor())
+            .unwrap_or(0.0);
+
         let gauge = Gauge::default()
             .block(block)
             .gauge_style(Color::Green)
