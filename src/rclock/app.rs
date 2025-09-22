@@ -7,6 +7,7 @@ use std::io::Error;
 
 use crate::rclock::pomodoro;
 use crate::rclock::pomodoro::Pomodoro;
+use crate::rclock::pomodoro::PomodoroState;
 use crate::rclock::timer;
 
 pub struct App {
@@ -102,6 +103,13 @@ impl App {
     pub fn get_pomodoro_round(&self) -> Option<i32> {
         match &self.pomodoro {
             Some(p) => Some(p.get_round()),
+            None => None,
+        }
+    }
+
+    pub fn get_pomodoro_state(&self) -> Option<&PomodoroState> {
+        match &self.pomodoro {
+            Some(p) => Some(p.get_state()),
             None => None,
         }
     }

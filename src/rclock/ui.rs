@@ -77,7 +77,7 @@ impl UI {
     fn partition_layout(frame: &mut Frame) -> (Rect, Rect, Rect) {
         let outer_layout = Layout::default()
             .direction(Direction::Vertical)
-            .constraints(vec![Constraint::Percentage(75), Constraint::Percentage(25)])
+            .constraints(vec![Constraint::Percentage(75), Constraint::Percentage(35)])
             .split(frame.area());
         let (top, bottom) = (outer_layout[0], outer_layout[1]);
 
@@ -181,7 +181,21 @@ impl UI {
             Some(r) => r.to_string(),
             None => "None".to_string(),
         };
-        let msg = format!("Round: {}", pomodoro_round_str);
+        let pomodoro_timer_str = match app.get_pomodoro_timer() {
+            Some(t) => t.time().format("%H:%M:%S").to_string(),
+            None => "None".to_string(),
+        };
+        let pomodoro_state_str = match app.get_pomodoro_state() {
+            Some(s) => match s {
+                crate::rclock::pomodoro::PomodoroState::Running => "Running".to_string(),
+                crate::rclock::pomodoro::PomodoroState::Paused => "Paused".to_string(),
+            },
+            None => "None".to_string(),
+        };
+        let msg = format!(
+            "Round: {}\n{}\n{}",
+            pomodoro_round_str, pomodoro_timer_str, pomodoro_state_str
+        );
         frame.render_widget(Paragraph::new(msg).block(block), area);
     }
 
