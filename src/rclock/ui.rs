@@ -85,16 +85,16 @@ impl UI {
 
     fn render_top_widget(frame: &mut Frame, area: Rect, app: &app::App) {
         let block = Block::new().borders(Borders::ALL);
-        let time_str: String = app.base_time.time().format("%H:%M").to_string();
+        let time_str: String = app.base_time.time().format("%H:%M:%S").to_string();
         let clock_text = BigText::builder()
-            .pixel_size(PixelSize::HalfHeight)
+            .pixel_size(PixelSize::Full)
             .style(Color::Green)
             .centered()
             .lines(vec![time_str.into()])
             .build();
         frame.render_widget(block, area);
 
-        let [area] = Layout::vertical([Constraint::Percentage(60)])
+        let [area] = Layout::vertical([Constraint::Length(8)])
             .flex(Flex::Center)
             .areas(area);
         frame.render_widget(clock_text, area);
