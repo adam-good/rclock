@@ -17,8 +17,8 @@ pub struct App {
 
 #[derive(Eq, PartialEq)]
 enum AppState {
-    Running,
-    Stopped,
+    Running, // App is fully running
+    Stopped, // App is completely stopped
 }
 
 impl App {
@@ -32,15 +32,39 @@ impl App {
 
     pub fn run(&mut self) {
         self.state = AppState::Running;
-        if let Some(p) = &mut self.pomodoro {
-            p.run();
-        }
+        self.start_timer();
     }
 
     pub fn stop(&mut self) {
         self.state = AppState::Stopped;
+        self.pause_timer();
+    }
+
+    pub fn toggle_pause(&mut self) {
+        match self.state {
+            AppState::Stopped => panic!("Error: Can't Pause Stopped App!"),
+            AppState::Running => self.pause(),
+        }
+    }
+
+    fn pause(&mut self) {
+        if let Some(p) = &mut self.pomodoro {
+            match p.get_state() {
+                pomodoro::PomodoroState::Running => self.pause_timer(),
+                pomodoro::PomodoroState::Paused => self.start_timer(),
+            }
+        }
+    }
+
+    fn pause_timer(&mut self) {
         if let Some(p) = &mut self.pomodoro {
             p.pause();
+        }
+    }
+
+    fn start_timer(&mut self) {
+        if let Some(p) = &mut self.pomodoro {
+            p.run();
         }
     }
 
@@ -61,10 +85,9 @@ impl App {
         self.base_time = Local::now();
 
         // TODO: Pretty sure there's better syntax for this but I'm blanking right now
-        match &mut self.pomodoro {
-            Some(p) => p.update(),
-            None => {}
-        };
+        if let Some(p) = &mut self.pomodoro {
+            p.update();
+        }
 
         Ok(())
     }

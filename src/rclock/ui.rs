@@ -33,6 +33,10 @@ impl UI {
         ratatui::restore();
     }
 
+    pub fn toggle_pause(&self, app: &mut app::App) {
+        app.toggle_pause();
+    }
+
     pub fn view(&mut self, app: &app::App) {
         self.terminal
             .draw(|frame| {
@@ -65,6 +69,7 @@ impl UI {
     fn handle_key_event(&mut self, key_event: KeyEvent, app: &mut app::App) {
         match key_event.code {
             KeyCode::Char('q') => self.shutdown(app),
+            KeyCode::Char(' ') => self.toggle_pause(app),
             _ => {}
         }
     }

@@ -38,6 +38,7 @@ impl Timer {
     */
 
     pub fn run(&mut self) {
+        self.last_update = Local::now();
         self.state = TimerState::Running;
     }
 
