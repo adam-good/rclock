@@ -1,25 +1,17 @@
 use crate::rclock::app;
 use crate::rclock::drawer;
+use crate::rclock::pomodoro::PomodoroState;
 use chrono::Timelike;
 use crossterm::event::{self, Event, KeyCode, KeyEvent, KeyEventKind};
 use ratatui::DefaultTerminal;
 use ratatui::Frame;
-use ratatui::layout::Constraint;
-use ratatui::layout::Direction;
-use ratatui::layout::Layout;
-use ratatui::layout::Rect;
+use ratatui::layout::{Constraint, Direction, Layout, Rect};
 use ratatui::style::Color;
 use ratatui::symbols::Marker;
-use ratatui::widgets::Block;
-use ratatui::widgets::Borders;
-use ratatui::widgets::Gauge;
-use ratatui::widgets::Paragraph;
-use ratatui::widgets::canvas::Canvas;
-use ratatui::widgets::canvas::Context;
+use ratatui::widgets::canvas::{Canvas, Context};
+use ratatui::widgets::{Block, Borders, Gauge, Paragraph};
 use std::io;
 use std::time::Duration;
-
-use crate::rclock::pomodoro::PomodoroState;
 
 pub struct UI {
     terminal: DefaultTerminal,

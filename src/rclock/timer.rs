@@ -1,7 +1,4 @@
-use chrono::DateTime;
-use chrono::Local;
-use chrono::TimeDelta;
-use chrono::Utc;
+use chrono::{DateTime, Local, TimeDelta, Utc};
 
 use std::fmt;
 use std::io;

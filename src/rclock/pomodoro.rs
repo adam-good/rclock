@@ -1,7 +1,5 @@
 use crate::rclock::timer;
-use chrono::DateTime;
-use chrono::TimeDelta;
-use chrono::Utc;
+use chrono::{DateTime, TimeDelta, Utc};
 use std::collections::HashMap;
 use std::fmt;
 
