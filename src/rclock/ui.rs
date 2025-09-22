@@ -1,6 +1,7 @@
 use crate::rclock::app;
 use crate::rclock::drawer;
 use crate::rclock::pomodoro::PomodoroState;
+use crate::rclock::pomodoro::TimerIntent;
 use chrono::Timelike;
 use crossterm::event::{self, Event, KeyCode, KeyEvent, KeyEventKind};
 use ratatui::DefaultTerminal;
@@ -73,7 +74,7 @@ impl UI {
     fn partition_layout(frame: &mut Frame) -> (Rect, Rect, Rect) {
         let outer_layout = Layout::default()
             .direction(Direction::Vertical)
-            .constraints(vec![Constraint::Percentage(75), Constraint::Percentage(35)])
+            .constraints(vec![Constraint::Percentage(70), Constraint::Percentage(40)])
             .split(frame.area());
         let (top, bottom) = (outer_layout[0], outer_layout[1]);
 
@@ -189,10 +190,16 @@ impl UI {
                 PomodoroState::Paused => "Paused",
             })
             .unwrap_or("None");
-
+        let timer_intent_str = app
+            .get_pomodoro_timer_intent()
+            .map(|i| match i {
+                TimerIntent::Work => "Work",
+                TimerIntent::Break => "Break",
+            })
+            .unwrap_or("None");
         let msg = format!(
-            "Round: {}\n{}\n{}",
-            pomodoro_round_str, pomodoro_timer_str, pomodoro_state_str
+            "Round: {}\n{}\n{}\n{}",
+            pomodoro_round_str, pomodoro_timer_str, pomodoro_state_str, timer_intent_str
         );
         frame.render_widget(Paragraph::new(msg).block(block), area);
     }

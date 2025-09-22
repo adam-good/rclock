@@ -16,7 +16,7 @@ pub struct Pomodoro {
     state: PomodoroState,
 }
 
-enum TimerIntent {
+pub enum TimerIntent {
     Work,
     Break,
 }
@@ -105,6 +105,10 @@ impl Pomodoro {
 
     pub fn get_state(&self) -> &PomodoroState {
         &self.state
+    }
+
+    pub fn get_intent(&self) -> &TimerIntent {
+        &self.intent
     }
 
     pub fn update(&mut self) {
