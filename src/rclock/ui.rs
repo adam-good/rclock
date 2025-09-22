@@ -19,6 +19,8 @@ use ratatui::widgets::canvas::Context;
 use std::io;
 use std::time::Duration;
 
+use crate::rclock::pomodoro::PomodoroState;
+
 pub struct UI {
     terminal: DefaultTerminal,
 }
@@ -181,21 +183,21 @@ impl UI {
         let block = Block::new().borders(Borders::ALL);
 
         // TODO: Better syntax??
-        let pomodoro_round_str = match app.get_pomodoro_round() {
-            Some(r) => r.to_string(),
-            None => "None".to_string(),
-        };
-        let pomodoro_timer_str = match app.get_pomodoro_timer() {
-            Some(t) => t.time().format("%H:%M:%S").to_string(),
-            None => "None".to_string(),
-        };
-        let pomodoro_state_str = match app.get_pomodoro_state() {
-            Some(s) => match s {
-                crate::rclock::pomodoro::PomodoroState::Running => "Running".to_string(),
-                crate::rclock::pomodoro::PomodoroState::Paused => "Paused".to_string(),
-            },
-            None => "None".to_string(),
-        };
+        let pomodoro_round_str: String = app
+            .get_pomodoro_round()
+            .map_or("None".to_string(), |r| r.to_string());
+        let pomodoro_timer_str = app
+            .get_pomodoro_timer()
+            .map(|t| t.time().format("%H:%M:%S").to_string())
+            .unwrap_or("None".to_string());
+        let pomodoro_state_str = app
+            .get_pomodoro_state()
+            .map(|s| match s {
+                PomodoroState::Running => "Running",
+                PomodoroState::Paused => "Paused",
+            })
+            .unwrap_or("None");
+
         let msg = format!(
             "Round: {}\n{}\n{}",
             pomodoro_round_str, pomodoro_timer_str, pomodoro_state_str
