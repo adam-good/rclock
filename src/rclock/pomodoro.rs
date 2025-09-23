@@ -10,9 +10,9 @@ struct PomodoroRound {
 
 pub struct Pomodoro {
     timer: Option<timer::Timer>,
-    round_cycle: HashMap<i32, PomodoroRound>,
-    round_counter: i32,
-    intent: TimerIntent,
+    round_cycle: HashMap<u16, PomodoroRound>,
+    round_counter: u16,
+    intent: Option<TimerIntent>,
     state: PomodoroState,
 }
 
@@ -27,56 +27,42 @@ pub enum PomodoroState {
 }
 
 impl Pomodoro {
-    pub fn new(work: i64, short_break: i64, long_break: i64) -> Self {
-        let work_delta: TimeDelta =
-            TimeDelta::new(work * 60, 0).expect("Failed to Create Work Timer {work}");
-        let break_delta1: TimeDelta = TimeDelta::new(short_break * 60, 0)
-            .expect("Failed to Create Short Break Timer {short_break}");
-        let break_delta2: TimeDelta = TimeDelta::new(long_break * 60, 0)
-            .expect("Failed to Create Long Break Timer {long_break}");
-
-        let mut round_cycle_map = HashMap::<i32, PomodoroRound>::new();
-        round_cycle_map.insert(
-            0,
-            PomodoroRound {
-                work_time: work_delta,
-                break_time: break_delta2,
-            },
-        );
-        round_cycle_map.insert(
-            1,
-            PomodoroRound {
-                work_time: work_delta,
-                break_time: break_delta1,
-            },
-        );
-        round_cycle_map.insert(
-            2,
-            PomodoroRound {
-                work_time: work_delta,
-                break_time: break_delta1,
-            },
-        );
-        round_cycle_map.insert(
-            3,
-            PomodoroRound {
-                work_time: work_delta,
-                break_time: break_delta1,
-            },
-        );
-
-        let init_timer = timer::Timer::new(work_delta);
+    pub fn new(n_rounds: &u16, work_times: &Vec<i64>, break_times: &Vec<i64>) -> Self {
+        let mut round_cycle_map: HashMap<u16, PomodoroRound> = HashMap::<u16, PomodoroRound>::new();
+        for round in 1..n_rounds + 1 {
+            let i: usize = usize::from(round) - 1;
+            let work_delta: TimeDelta = TimeDelta::new(work_times[i] * 60, 0).unwrap();
+            let break_delta: TimeDelta = TimeDelta::new(break_times[i], 0).unwrap();
+            round_cycle_map.insert(
+                round,
+                PomodoroRound {
+                    work_time: work_delta,
+                    break_time: break_delta,
+                },
+            );
+        }
 
         Self {
-            timer: Some(init_timer),
+            timer: None,
             round_cycle: round_cycle_map,
             round_counter: 1,
-            intent: TimerIntent::Work,
+            intent: None,
             state: PomodoroState::Paused,
         }
     }
 
+    pub fn init(&mut self) {
+        self.round_counter = 1;
+        let round = self.round_cycle.get(&self.round_counter).unwrap();
+        self.timer = Some(timer::Timer::new(round.work_time));
+        self.intent = Some(TimerIntent::Work);
+    }
+
     pub fn run(&mut self) {
+        if let None = self.timer {
+            self.init();
+        }
+
         self.state = PomodoroState::Running;
         match &mut self.timer {
             Some(t) => t.run(),
@@ -92,14 +78,14 @@ impl Pomodoro {
         }
     }
 
-    pub fn get_timer(&self) -> &timer::Timer {
+    pub fn get_timer(&self) -> Option<&timer::Timer> {
         match &self.timer {
-            Some(t) => t,
-            None => panic!("Error: Getting None Timer from Pomodoro"),
+            Some(t) => Some(t),
+            None => None,
         }
     }
 
-    pub fn get_round(&self) -> i32 {
+    pub fn get_round(&self) -> u16 {
         self.round_counter
     }
 
@@ -107,40 +93,43 @@ impl Pomodoro {
         &self.state
     }
 
-    pub fn get_intent(&self) -> &TimerIntent {
-        &self.intent
+    // TODO: This seems hacky. Probably needs improved
+    pub fn get_intent(&self) -> Option<&TimerIntent> {
+        match &self.intent {
+            Some(i) => Some(&i),
+            None => None,
+        }
     }
 
     pub fn update(&mut self) {
-        match &mut self.timer {
-            None => panic!("Error: Updating Pomodoro Without a Timer!"),
-            Some(timer) => {
-                let _ = timer.update();
-
-                if timer.time() - DateTime::<Utc>::default() < TimeDelta::new(0, 1000000).unwrap() {
-                    self.cycle_timer();
-                }
+        if let Some(timer) = &mut self.timer {
+            let default = DateTime::<Utc>::default();
+            let _ = timer.update(); //TODO: Should do something here
+            if (timer.time() - default).as_seconds_f32() < 0.5 {
+                self.cycle_timer();
             }
         }
     }
 
     fn cycle_timer(&mut self) {
-        match self.intent {
-            TimerIntent::Work => {
-                let round_cycle_idx: i32 = self.round_counter % 4;
-                let round = self.round_cycle.get(&round_cycle_idx).unwrap();
-                self.timer = Some(timer::Timer::new(round.break_time));
-                self.intent = TimerIntent::Break;
-                self.run();
-            }
-            TimerIntent::Break => {
-                let next_round_num: i32 = self.round_counter + 1;
-                let round_cycle_idx: i32 = next_round_num % 4;
-                let round: &PomodoroRound = self.round_cycle.get(&round_cycle_idx).unwrap();
-                self.timer = Some(timer::Timer::new(round.work_time));
-                self.intent = TimerIntent::Work;
-                self.round_counter = next_round_num;
-                self.run();
+        if let Some(intent) = &self.intent {
+            match intent {
+                TimerIntent::Work => {
+                    let round_cycle_idx: u16 = self.round_counter % 4;
+                    let round = self.round_cycle.get(&round_cycle_idx).unwrap();
+                    self.timer = Some(timer::Timer::new(round.break_time));
+                    self.intent = Some(TimerIntent::Break);
+                    self.run();
+                }
+                TimerIntent::Break => {
+                    let next_round_num: u16 = self.round_counter + 1;
+                    let round_cycle_idx: u16 = next_round_num % 4;
+                    let round: &PomodoroRound = self.round_cycle.get(&round_cycle_idx).unwrap();
+                    self.timer = Some(timer::Timer::new(round.work_time));
+                    self.intent = Some(TimerIntent::Work);
+                    self.round_counter = next_round_num;
+                    self.run();
+                }
             }
         }
     }

@@ -1,7 +1,7 @@
 pub struct Config {
-    cycle_len: u16,        // Number of rounds per cycle
-    work_times: Vec<u32>,  // Times (in seconds) of the work timers
-    break_times: Vec<u32>, // Times (in seconds) of the break timers
+    pub cycle_len: u16,        // Number of rounds per cycle
+    pub work_times: Vec<i64>,  // Times (in seconds) of the work timers
+    pub break_times: Vec<i64>, // Times (in seconds) of the break timers
 }
 
 impl Default for Config {

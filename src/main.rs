@@ -6,10 +6,10 @@ use rclock::{app, ui};
 fn main() {
     let config: Config = load_config();
 
-    let mut app: app::App = app::App::new();
+    let mut app: app::App = app::App::new(config);
     let mut app_ui: ui::UI = ui::UI::new();
 
-    app.new_pomodoro(20, 5, 15);
+    app.new_pomodoro();
     app.run();
     while app.is_running() {
         app.update().unwrap();
