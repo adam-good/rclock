@@ -12,6 +12,7 @@ pub struct Pomodoro {
     timer: Option<timer::Timer>,
     round_cycle: HashMap<u16, PomodoroRound>,
     round_counter: u16,
+    cycle_size: u16,
     intent: Option<TimerIntent>,
     state: PomodoroState,
 }
@@ -46,6 +47,7 @@ impl Pomodoro {
             timer: None,
             round_cycle: round_cycle_map,
             round_counter: 1,
+            cycle_size: *n_rounds,
             intent: None,
             state: PomodoroState::Paused,
         }
@@ -123,8 +125,11 @@ impl Pomodoro {
                 }
                 TimerIntent::Break => {
                     let next_round_num: u16 = self.round_counter + 1;
-                    let round_cycle_idx: u16 = next_round_num % 4;
-                    let round: &PomodoroRound = self.round_cycle.get(&round_cycle_idx).unwrap();
+                    let round_cycle_idx: u16 = (next_round_num % self.cycle_size) + 1;
+                    let round: &PomodoroRound = self
+                        .round_cycle
+                        .get(&round_cycle_idx)
+                        .expect(format!("Can't find round for {}", round_cycle_idx).as_str());
                     self.timer = Some(timer::Timer::new(round.work_time));
                     self.intent = Some(TimerIntent::Work);
                     self.round_counter = next_round_num;
