@@ -23,7 +23,7 @@ fn main() {
         ])
         .get_matches();
 
-    let config: &Config = Config::default()
+    let config: Config = Config::default()
         .from_config(String::from("/tmp/rclock/config.toml"))
         .from_matches(matches);
 

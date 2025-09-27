@@ -25,7 +25,7 @@ impl Default for Config {
 }
 
 impl Config {
-    pub fn from_matches(&mut self, matches: clap::ArgMatches) -> &Self {
+    pub fn from_matches(mut self, matches: clap::ArgMatches) -> Self {
         if let Some(num_rounds) = matches.get_one::<u16>("rounds") {
             self.cycle_len = *num_rounds;
         }
@@ -39,7 +39,7 @@ impl Config {
         self
     }
 
-    pub fn from_config(&mut self, path_str: String) -> &Self {
+    pub fn from_config(mut self, path_str: String) -> Self {
         let path = Path::new(path_str.as_str());
         match path.exists() {
             false => self,
