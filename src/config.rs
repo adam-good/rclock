@@ -26,14 +26,20 @@ impl Default for Config {
 
 impl Config {
     pub fn from_matches(mut self, matches: clap::ArgMatches) -> Self {
-        if let Some(num_rounds) = matches.get_one::<u16>("rounds") {
-            self.cycle_len = *num_rounds;
+        if let Some(num_rounds_str) = matches.get_one::<String>("rounds") {
+            let num_rounds: u16 = str::parse(&num_rounds_str)
+                .expect("Failed to Parse Command Line Argument for Rounds");
+            self.cycle_len = num_rounds;
         }
-        if let Some(work_times) = matches.get_one::<Vec<i64>>("work") {
-            self.work_times = work_times.to_owned(); //TODO: is this okay?
+        if let Some(work_times_str) = matches.get_one::<String>("work") {
+            let work_time: i64 = str::parse(&work_times_str)
+                .expect("Failed to parse Command Line Argument for work");
+            self.work_times = vec![work_time; self.cycle_len as usize];
         }
-        if let Some(break_times) = matches.get_one::<Vec<i64>>("break") {
-            self.break_times = break_times.to_owned()
+        if let Some(break_times_str) = matches.get_one::<String>("break") {
+            let break_time: i64 = str::parse(&break_times_str)
+                .expect("Failed to parse Command Line Argument for break");
+            self.break_times = vec![break_time; self.cycle_len as usize];
         }
 
         self
