@@ -23,9 +23,7 @@ fn main() {
         ])
         .get_matches();
 
-    let config: Config = Config::default()
-        .from_config(String::from("/tmp/rclock/config.toml"))
-        .from_matches(matches);
+    let config: Config = Config::default().from_config(None).from_matches(matches);
 
     let mut app: app::App = app::App::new(config);
     let mut app_ui: ui::UI = ui::UI::new();

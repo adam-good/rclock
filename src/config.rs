@@ -1,5 +1,9 @@
+use dirs::home_dir;
 use serde::{Deserialize, Serialize};
-use std::path::Path;
+use std::{
+    path::{Path, PathBuf},
+    str::FromStr,
+};
 
 pub struct Config {
     pub cycle_len: u16,        // Number of rounds per cycle
@@ -45,8 +49,14 @@ impl Config {
         self
     }
 
-    pub fn from_config(mut self, path_str: String) -> Self {
-        let path = Path::new(path_str.as_str());
+    pub fn from_config(mut self, path_str: Option<String>) -> Self {
+        let base_dir = home_dir().unwrap_or(PathBuf::from_str("/tmp").unwrap());
+        let default_dir = base_dir.join(".config").join("rclock").join("config.toml");
+        let path = match &path_str {
+            Some(s) => Path::new(s.as_str()),
+            None => &default_dir,
+        };
+        //        let path = Path::new(path_str.as_str());
         match path.exists() {
             false => self,
             true => {
