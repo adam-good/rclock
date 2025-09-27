@@ -32,7 +32,7 @@ impl Pomodoro {
         for round in 1..n_rounds + 1 {
             let i: usize = usize::from(round) - 1;
             let work_delta: TimeDelta = TimeDelta::new(work_times[i] * 60, 0).unwrap();
-            let break_delta: TimeDelta = TimeDelta::new(break_times[i], 0).unwrap();
+            let break_delta: TimeDelta = TimeDelta::new(break_times[i] * 60, 0).unwrap();
             round_cycle_map.insert(
                 round,
                 PomodoroRound {
