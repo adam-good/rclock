@@ -85,16 +85,16 @@ impl UI {
 
     fn render_top_widget(frame: &mut Frame, area: Rect, app: &app::App) {
         let block = Block::new().borders(Borders::ALL);
-        let time_str: String = app.base_time.time().format("%H:%M:%S").to_string();
+        let time_str: String = app.base_time.time().format("%H:%M").to_string();
         let clock_text = BigText::builder()
-            .pixel_size(PixelSize::Full)
+            .pixel_size(PixelSize::HalfHeight)
             .style(Color::Green)
             .centered()
             .lines(vec![time_str.into()])
             .build();
         frame.render_widget(block, area);
 
-        let [area] = Layout::vertical([Constraint::Length(8)])
+        let [area] = Layout::vertical([Constraint::Length(4)])
             .flex(Flex::Center)
             .areas(area);
         frame.render_widget(clock_text, area);
@@ -111,8 +111,11 @@ impl UI {
             .map(|p: &Pomodoro| -> String { p.get_round().to_string() })
             .unwrap_or(String::from(default));
         let pomodoro_timer_str: String = pomodoro
-            .map(|p: &Pomodoro| -> String { p.get_timer().time().format("%H:%M:%S").to_string() })
+            .map(|p| p.get_timer())
+            .flatten()
+            .map(|t| t.time().format("%H:%M:%S").to_string())
             .unwrap_or(String::from(default));
+
         let pomodoro_state_str: String = pomodoro
             .map(|p: &Pomodoro| -> String {
                 match p.get_state() {
@@ -122,14 +125,13 @@ impl UI {
             })
             .unwrap_or(String::from(default));
         let timer_intent_str: String = pomodoro
-            .map(|p: &Pomodoro| -> String {
-                match p.get_intent() {
-                    TimerIntent::Work => "Work".to_string(),
-                    TimerIntent::Break => "Break".to_string(),
-                }
+            .map(|p| p.get_intent())
+            .flatten()
+            .map(|intent| match intent {
+                TimerIntent::Work => String::from("Work"),
+                TimerIntent::Break => String::from("Break"),
             })
             .unwrap_or(String::from(default));
-
         // TODO: Better syntax??
         let msg = format!(
             "Round: {}\n{}\n{}\n{}",
@@ -143,7 +145,9 @@ impl UI {
 
         let perc = app
             .get_pomodoro()
-            .map(|p: &Pomodoro| p.get_timer().get_perc().floor())
+            .map(|p: &Pomodoro| p.get_timer())
+            .flatten()
+            .map(|t| t.get_perc().floor())
             .unwrap_or(0.0);
 
         let gauge = Gauge::default()

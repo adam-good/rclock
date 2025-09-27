@@ -5,6 +5,7 @@ use std::io;
 use std::fmt;
 use std::io::Error;
 
+use crate::config::Config;
 use crate::rclock::pomodoro;
 use crate::rclock::pomodoro::Pomodoro;
 
@@ -12,6 +13,7 @@ pub struct App {
     pub base_time: DateTime<Local>,
     pomodoro: Option<pomodoro::Pomodoro>,
     state: AppState,
+    config: Config,
 }
 
 #[derive(Eq, PartialEq)]
@@ -21,17 +23,18 @@ enum AppState {
 }
 
 impl App {
-    pub fn new() -> Self {
+    pub fn new(config: Config) -> Self {
         App {
             base_time: Local::now(),
             pomodoro: None,
             state: AppState::Stopped,
+            config: config,
         }
     }
 
     pub fn run(&mut self) {
         self.state = AppState::Running;
-        self.start_timer();
+        //self.start_timer();
     }
 
     pub fn stop(&mut self) {
@@ -71,8 +74,12 @@ impl App {
         self.state == AppState::Running
     }
 
-    pub fn new_pomodoro(&mut self, work_mins: i64, short_break_mins: i64, long_break_mins: i64) {
-        self.pomodoro = Some(Pomodoro::new(work_mins, short_break_mins, long_break_mins));
+    pub fn new_pomodoro(&mut self) {
+        self.pomodoro = Some(Pomodoro::new(
+            &self.config.cycle_len,
+            &self.config.work_times,
+            &self.config.break_times,
+        ));
     }
 
     pub fn update(&mut self) -> io::Result<()> {

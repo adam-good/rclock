@@ -1,12 +1,34 @@
+use clap::{Arg, Command};
+
+mod config;
 mod rclock;
-use rclock::app;
-use rclock::ui;
+use config::Config;
+use rclock::{app, ui};
 
 fn main() {
-    let mut app: app::App = app::App::new();
+    let matches = Command::new("rclock")
+        .args(vec![
+            Arg::new("rounds")
+                .short('r')
+                .long("rounds")
+                .help("How Many Rounds in One Cycle"),
+            Arg::new("work")
+                .short('w')
+                .long("work")
+                .help("How Many Minutes on the Work Timer"),
+            Arg::new("break")
+                .short('b')
+                .long("break")
+                .help("How Many Minutes on the Break Timer"),
+        ])
+        .get_matches();
+
+    let config: Config = Config::default().from_config(None).from_matches(matches);
+
+    let mut app: app::App = app::App::new(config);
     let mut app_ui: ui::UI = ui::UI::new();
 
-    app.new_pomodoro(3, 1, 2);
+    app.new_pomodoro();
     app.run();
     while app.is_running() {
         app.update().unwrap();
