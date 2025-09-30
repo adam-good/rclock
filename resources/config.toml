@@ -1,0 +1,4 @@
+
+cycle_len = 3
+work_times = [1,2,3]
+break_times = [2,2,2]
