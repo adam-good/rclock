@@ -3,5 +3,9 @@
 use rclock;
 
 fn main() {
-    println!("{:?}", rclock::utils::Timer::new());
+    let timer = rclock::utils::Timer::new();
+
+    std::thread::sleep(std::time::Duration::new(2, 0));
+
+    println!("{:?}", timer.tick());
 }

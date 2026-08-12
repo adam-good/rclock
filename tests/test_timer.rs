@@ -1,7 +1,10 @@
 
 use rclock;
+use rclock::utils::Timer;
+
+// Integration Tests
 
 #[test]
-fn test() {
-    println!("{:?}", rclock::utils::Timer::new());
+fn test_something() {
+   unimplemented!() 
 }
