@@ -28,6 +28,10 @@ impl Timer {
         Timer::new(time::Instant::now())
     }
 
+    pub fn duration(self) -> time::Duration {
+        self.tick_time - self.base_time
+    }
+
     fn shift(self, delta: time::Duration) -> Timer {
         Timer { 
             base_time: self.base_time + delta, 
@@ -67,6 +71,19 @@ mod tests {
     }
 
     #[test]
+    fn test_duration() {
+        let dur = time::Duration::new(2, 0);
+        let now = time::Instant::now();
+        let timer = Timer {
+            base_time: now,
+            tick_time: now + dur,
+            state: TimerState::Running,
+        };
+
+        assert_eq!(timer.duration(), dur);
+    }
+
+    #[test]
     fn test_tick_running() {
         let dur = time::Duration::new(2, 0);
         let now = time::Instant::now();
@@ -76,6 +93,7 @@ mod tests {
             state: TimerState::Running,
         };
 
+        // TODO: do this without sleeping?
         std::thread::sleep(dur);
         let timer = timer.tick();
         let delta = timer.tick_time - timer.base_time;
@@ -93,6 +111,7 @@ mod tests {
             state: TimerState::Paused,
         };
 
+        // TODO: Do this without sleeping?
         std::thread::sleep(dur);
         let timer = timer.tick();
         let delta = timer.tick_time - timer.base_time;
