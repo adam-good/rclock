@@ -1,5 +1,6 @@
 
 mod types;
+use types::{Hour, Minute};
 use std::time;
 use std::fmt::Display;
 
@@ -44,8 +45,12 @@ impl Timer {
         self.tick_time - self.base_time
     }
 
-    pub fn hours(&self) -> types::Hour {
-        types::Hour::from_secs(self.duration().as_secs())
+    pub fn get_hours(&self) -> Hour {
+        Hour::from_secs(self.duration().as_secs())
+    }
+
+    pub fn get_minutes(&self) -> Minute {
+        Minute::from_secs(self.duration().as_secs() % types::SECS_PER_HOUR)
     }
 
     pub fn run(self) -> Timer {
@@ -167,9 +172,25 @@ mod tests {
             state: TimerState::Paused
         };
 
-        let hours = timer.hours();
-        let target = types::Hour::new(3);
+        let hours = timer.get_hours();
+        let target = Hour::new(3);
         assert_eq!(hours, target);
+    }
+
+    #[test]
+    fn test_get_minutes() {
+        let dur = time::Duration::new((3*3600)+(5*60)+36, 0);
+        let now = time::Instant::now();
+        let timer = Timer {
+            base_time: now,
+            tick_time: now+dur,
+            state: TimerState::Paused,
+        };
+
+        let minutes = timer.get_minutes();
+        let target = Minute::new(5);
+
+        assert_eq!(minutes, target);
     }
 
     #[test]
