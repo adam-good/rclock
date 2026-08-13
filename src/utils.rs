@@ -1,5 +1,6 @@
 
 use std::time;
+use std::fmt::Display;
 
 #[derive(Debug)]
 pub struct Timer {
@@ -15,6 +16,17 @@ enum TimerState {
     Paused,
 }
 
+impl Display for Timer {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let secs:  u64 = self.duration().as_secs();
+        let hours: u64 = secs / 3600;
+        let secs = secs % 3600;
+        let mins:  u64 = secs / 60;
+        let secs = secs % 60;
+        write!(f, "{}:{}:{}", hours,mins,secs)
+    }
+}
+
 impl Timer {
     pub fn new(start: time::Instant) -> Timer {
         Timer { 
@@ -28,7 +40,7 @@ impl Timer {
         Timer::new(time::Instant::now())
     }
 
-    pub fn duration(self) -> time::Duration {
+    pub fn duration(&self) -> time::Duration {
         self.tick_time - self.base_time
     }
 
@@ -84,6 +96,22 @@ mod tests {
         let timer = Timer::new(inst);
         assert_eq!(timer.base_time, inst);
         assert_eq!(timer.tick_time, inst);
+    }
+
+    #[test]
+    fn test_display() {
+        let dur = time::Duration::new(3600+360+32, 0);
+        let now = time::Instant::now();
+        let timer = Timer {
+            base_time: now,
+            tick_time: now+dur,
+            state: TimerState::Paused
+        };
+
+        let restult = timer.to_string();
+        let target = "1:6:32";
+
+        assert_eq!(restult, target);
     }
 
     #[test]
