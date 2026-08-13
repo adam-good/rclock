@@ -1,6 +1,4 @@
 
-use rclock;
-use rclock::utils::Timer;
 
 // Integration Tests
 
