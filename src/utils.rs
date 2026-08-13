@@ -40,6 +40,14 @@ impl Timer {
         }
     }
 
+    pub fn pause(self) -> Timer {
+        Timer { 
+            base_time: self.base_time, 
+            tick_time: self.tick_time, 
+            state: TimerState::Paused 
+        }
+    }
+
     fn shift(&self, delta: time::Duration) -> Timer {
         Timer { 
             base_time: self.base_time + delta, 
@@ -89,6 +97,19 @@ mod tests {
         let timer = timer.run();
 
         assert_eq!(timer.state, TimerState::Running);
+    }
+
+    #[test]
+    fn test_pause() {
+        let now = time::Instant::now();
+        let timer = Timer {
+            base_time: now,
+            tick_time: now,
+            state: TimerState::Running,
+        };
+        let timer = timer.pause();
+
+        assert_eq!(timer.state, TimerState::Paused);
     }
 
     #[test]
