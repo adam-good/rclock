@@ -9,7 +9,7 @@ pub struct Timer {
 }
 
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 enum TimerState {
     Running,
     Paused,
@@ -32,7 +32,15 @@ impl Timer {
         self.tick_time - self.base_time
     }
 
-    fn shift(self, delta: time::Duration) -> Timer {
+    pub fn run(self) -> Timer {
+        Timer { 
+            base_time: self.base_time,
+            tick_time: self.tick_time, 
+            state: TimerState::Running 
+        }
+    }
+
+    fn shift(&self, delta: time::Duration) -> Timer {
         Timer { 
             base_time: self.base_time + delta, 
             tick_time: self.tick_time + delta, 
@@ -40,7 +48,7 @@ impl Timer {
         }
     }
 
-    fn advance(self, delta: time::Duration) -> Timer {
+    fn advance(&self, delta: time::Duration) -> Timer {
         Timer { 
             base_time: self.base_time, 
             tick_time: self.tick_time + delta, 
@@ -48,7 +56,7 @@ impl Timer {
         }
     }
 
-    pub fn tick(self) -> Timer {
+    pub fn tick(&self) -> Timer {
         let delta = time::Instant::now() - self.tick_time;
         match self.state { 
             TimerState::Paused => self.shift(delta),
@@ -68,6 +76,19 @@ mod tests {
         let timer = Timer::new(inst);
         assert_eq!(timer.base_time, inst);
         assert_eq!(timer.tick_time, inst);
+    }
+
+    #[test]
+    fn test_run() {
+        let now = time::Instant::now();
+        let timer = Timer {
+            base_time: now,
+            tick_time: now,
+            state: TimerState::Paused,
+        };
+        let timer = timer.run();
+
+        assert_eq!(timer.state, TimerState::Running);
     }
 
     #[test]
