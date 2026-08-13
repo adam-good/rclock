@@ -1,6 +1,6 @@
 
-mod types;
-use types::{Hour, Minute, Second};
+mod timestamp;
+use timestamp::{Hour, Minute, Second};
 use std::time;
 use std::fmt::Display;
 
