@@ -1,14 +1,15 @@
 
+use crate::utils::timer::timestamp::constants::{SECS_PER_HOUR, SECS_PER_MINUTE};
 use std::fmt::Display;
 
 #[derive(Debug, PartialEq)]
 pub struct Second {
-    val: u64
+    pub value: u64
 }
 
 impl Display for Second {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{:02}", self.val)
+        write!(f, "{:02}", self.value)
     }
 }
 
@@ -18,7 +19,13 @@ impl Second {
             panic!("Second-overflow");
         }
 
-        Self { val }
+        Self { value: val }
+    }
+
+    pub fn from_secs(secs: u64) -> Self {
+        let secs = secs % SECS_PER_HOUR;
+        let secs = secs % SECS_PER_MINUTE;
+        Self::new(secs)
     }
 }
 
@@ -29,8 +36,8 @@ mod tests {
 #[test]
     fn test_new() {
         let val = 5;
-        let second = Second { val: val };
-        assert_eq!(second.val, val);
+        let second = Second { value: val };
+        assert_eq!(second.value, val);
     }
 
     #[test]

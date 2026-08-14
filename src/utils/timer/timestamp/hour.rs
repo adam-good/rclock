@@ -1,16 +1,17 @@
 
+
+use crate::utils::timer::timestamp::constants::{SECS_PER_HOUR};
 use std::fmt::Display;
 
-pub const SECS_PER_HOUR: u64 = 3600;
 
 #[derive(Debug, PartialEq)]
 pub struct Hour {
-    val: u64
+    pub value: u64
 }
 
 impl Display for Hour {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{:02}", self.val)
+        write!(f, "{:02}", self.value)
     }
 }
 
@@ -20,7 +21,7 @@ impl Hour {
             panic!("Hour-overflow");
         }
 
-        Self { val }
+        Self { value: val }
     }
 
     pub fn from_secs(secs: u64) -> Self {
@@ -37,7 +38,7 @@ use super::*;
     fn test_new() {
         let val = 5;
         let hour = Hour::new(val);
-        assert_eq!(hour.val, val);
+        assert_eq!(hour.value, val);
     }
 
     #[test]
@@ -51,17 +52,17 @@ use super::*;
         let secs = SECS_PER_HOUR * 3 + 32;
         let hours = Hour::from_secs(secs);
 
-        assert_eq!(hours.val, 3);
+        assert_eq!(hours.value, 3);
     }
 
     #[test]
     fn test_display() {
-        let hours = Hour { val: 5 };
+        let hours = Hour { value: 5 };
         let result = hours.to_string();
         let target = "05";
         assert_eq!(result, target);
 
-        let hours = Hour { val: 12 };
+        let hours = Hour { value: 12 };
         let result = hours.to_string();
         let target = "12";
         assert_eq!(result, target);

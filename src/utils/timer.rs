@@ -1,6 +1,6 @@
 
 mod timestamp;
-use timestamp::{Hour, Minute, Second};
+use timestamp::{Timestamp};
 use std::time;
 use std::fmt::Display;
 
@@ -20,11 +20,8 @@ enum TimerState {
 impl Display for Timer {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let secs:  u64 = self.duration().as_secs();
-        let hours: u64 = secs / 3600;
-        let secs = secs % 3600;
-        let mins:  u64 = secs / 60;
-        let secs = secs % 60;
-        write!(f, "{}:{}:{}", hours,mins,secs)
+        let timestamp = Timestamp::from_secs(secs);
+        write!(f, "{}", timestamp)
     }
 }
 
@@ -45,16 +42,8 @@ impl Timer {
         self.tick_time - self.base_time
     }
 
-    pub fn get_hours(&self) -> Hour {
-        Hour::from_secs(self.duration().as_secs())
-    }
-
-    pub fn get_minutes(&self) -> Minute {
-        Minute::from_secs(self.duration().as_secs() % types::SECS_PER_HOUR)
-    }
-
-    pub fn get_seconds(&self) -> Second {
-        Second::new(self.duration().as_secs() % types::SECS_PER_MINUTE)
+    pub fn get_timestamp(&self) -> Timestamp {
+        Timestamp::from_secs(self.duration().as_secs())
     }
 
     pub fn run(self) -> Timer {
@@ -103,6 +92,10 @@ impl Timer {
 mod tests {
     use super::*;
 
+    // TODO: Import these from constants
+    const SECS_PER_MINUTE: u64 = 60;
+    const SECS_PER_HOUR:   u64 = 3600;
+
     #[test]
     fn test_new() {
         let inst = time::Instant::now();
@@ -122,7 +115,7 @@ mod tests {
         };
 
         let restult = timer.to_string();
-        let target = "1:6:32";
+        let target = "01:06:32";
 
         assert_eq!(restult, target);
     }
@@ -167,50 +160,25 @@ mod tests {
     }
 
     #[test]
-    fn test_get_hours() {
-        let dur = time::Duration::new(3*3600+360+36, 0);
+    fn test_get_timestamp() {
+        let hours = 14;
+        let minutes = 4;
+        let seconds = 32;
+        let total_secs = (hours * SECS_PER_HOUR) + 
+                         (minutes * SECS_PER_MINUTE) + 
+                         seconds;
+        let dur = time::Duration::new(total_secs, 0);
         let now = time::Instant::now();
         let timer = Timer {
-            base_time: now,
-            tick_time: now+dur,
-            state: TimerState::Paused
+           base_time: now,
+           tick_time: now+dur,
+           state: TimerState::Paused,
         };
 
-        let hours = timer.get_hours();
-        let target = Hour::new(3);
-        assert_eq!(hours, target);
-    }
+        let result = timer.get_timestamp();
+        let target = Timestamp::new(hours, minutes, seconds);
 
-    #[test]
-    fn test_get_minutes() {
-        let dur = time::Duration::new((3*3600)+(5*60)+36, 0);
-        let now = time::Instant::now();
-        let timer = Timer {
-            base_time: now,
-            tick_time: now+dur,
-            state: TimerState::Paused,
-        };
-
-        let minutes = timer.get_minutes();
-        let target = Minute::new(5);
-
-        assert_eq!(minutes, target);
-    }
-
-    #[test]
-    fn test_get_seconds() {
-        let dur = time::Duration::new((3*3600)+(5*60)+36, 0);
-        let now = time::Instant::now();
-        let timer = Timer {
-            base_time: now,
-            tick_time: now+dur,
-            state: TimerState::Paused
-        };
-
-        let seconds = timer.get_seconds();
-        let target = Second::new(36);
-
-        assert_eq!(seconds, target);
+        assert_eq!(result, target)
     }
 
     #[test]
