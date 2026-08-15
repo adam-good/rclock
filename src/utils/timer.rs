@@ -4,8 +4,22 @@ use timestamp::{Timestamp};
 use std::time;
 use std::fmt::Display;
 
+pub trait TimeProvider {
+    fn now(&mut self) -> std::time::Instant;
+}
+
+#[derive(Clone, Copy)]
+pub struct RealTimeProvider;
+
+impl TimeProvider for RealTimeProvider {
+    fn now(&mut self) -> std::time::Instant {
+        std::time::Instant::now()
+    }
+}
+
 #[derive(Debug)]
-pub struct Timer {
+pub struct Timer<T: TimeProvider> {
+    time_provider: T, 
     last_update: time::Instant,
     duration: time::Duration,
     state: TimerState,
@@ -17,17 +31,19 @@ enum TimerState {
     Paused,
 }
 
-impl Display for Timer {
+impl<T: TimeProvider> Display for Timer<T> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let timestamp = self.get_timestamp();
         write!(f, "{}", timestamp)
     }
 }
 
-impl Timer {
-    pub fn new(duration: time::Duration) -> Timer {
+impl<T: TimeProvider> Timer<T> {
+    pub fn new(mut time_provider: T, duration: time::Duration) -> Timer<T> {
+        let now = time_provider.now();
         Timer {
-            last_update: time::Instant::now(),
+            time_provider: time_provider,
+            last_update: now,
             duration: duration,
             state: TimerState::Paused,
         }
@@ -37,32 +53,37 @@ impl Timer {
         Timestamp::from_secs(self.duration.as_secs())
     }
 
-    pub fn run(self) -> Timer {
+    pub fn run(self) -> Timer<T> {
         Timer {
+            time_provider: self.time_provider,
             last_update: self.last_update,
             duration: self.duration,
             state: TimerState::Running,
         }
     }
 
-    pub fn pause(self) -> Timer {
+    pub fn pause(self) -> Timer<T> {
         Timer {
+            time_provider: self.time_provider,
             last_update: self.last_update,
             duration: self.duration,
             state: TimerState::Paused, 
         }
     }
 
-    pub fn tick(&self) -> Timer {
-        let now = time::Instant::now();
+    pub fn tick(self) -> Timer<T> {
+        let mut time_provider = self.time_provider;
+        let now = time_provider.now();
         let delta = now - self.last_update;
         match self.state { 
             TimerState::Paused => Timer {
+                time_provider: time_provider,
                 last_update: now,
                 duration: self.duration,
                 state: self.state
             },
             TimerState::Running => Timer {
+                time_provider: time_provider,
                 last_update: now, 
                 duration: self.duration - delta,
                 state: self.state 
@@ -88,19 +109,40 @@ mod tests {
                             (MINUTES * SECS_PER_MINUTE) +
                             SECONDS;
 
+    struct MockTimeProvider {
+        init_time: time::Instant,
+        ticks: u64,
+    }
+
+    impl MockTimeProvider {
+        fn new(init_time: time::Instant) -> Self {
+            MockTimeProvider { init_time: init_time, ticks: 0 }
+        }
+    }
+    impl TimeProvider for MockTimeProvider {
+        fn now(&mut self) -> std::time::Instant {
+            self.ticks += 1;
+            self.init_time + time::Duration::new(self.ticks, 0)
+        }
+    }
+
     #[test]
     fn test_new() {
+        let now = time::Instant::now();
+        let time_provider = MockTimeProvider::new(now);
         let dur = time::Duration::new(TOTAL_SECS, 0);
-        let timer = Timer::new(dur);
+        let timer = Timer::new(time_provider, dur);
         assert_eq!(timer.duration, dur);
         assert_eq!(timer.state, TimerState::Paused);
     }
 
     #[test]
     fn test_display() {
-        let dur = time::Duration::new(TOTAL_SECS, 0);
         let now = time::Instant::now();
+        let time_prov = MockTimeProvider::new(now);
+        let dur = time::Duration::new(TOTAL_SECS, 0);
         let timer = Timer {
+            time_provider: time_prov,
             last_update: now,
             duration: dur,
             state: TimerState::Paused
@@ -115,8 +157,10 @@ mod tests {
     #[test]
     fn test_run() {
         let now = time::Instant::now();
+        let time_prov = MockTimeProvider::new(now);
         let duration = time::Duration::new(TOTAL_SECS, 0);
         let timer = Timer {
+            time_provider: time_prov,
             last_update: now,
             duration: duration,
             state: TimerState::Paused,
@@ -129,8 +173,10 @@ mod tests {
     #[test]
     fn test_pause() {
         let now = time::Instant::now();
+        let time_prov = MockTimeProvider::new(now);
         let duration = time::Duration::new(TOTAL_SECS, 0);
         let timer = Timer {
+            time_provider: time_prov,
             last_update: now,
             duration: duration,
             state: TimerState::Running,
@@ -142,12 +188,14 @@ mod tests {
 
     #[test]
     fn test_get_timestamp() {
-        let dur = time::Duration::new(TOTAL_SECS, 0);
         let now = time::Instant::now();
+        let time_prov = MockTimeProvider::new(now);
+        let dur = time::Duration::new(TOTAL_SECS, 0);
         let timer = Timer {
-           last_update: now,
-           duration: dur,
-           state: TimerState::Paused,
+            time_provider: time_prov,
+            last_update: now,
+            duration: dur,
+            state: TimerState::Paused,
         };
 
         let result = timer.get_timestamp();
@@ -158,37 +206,40 @@ mod tests {
 
     #[test]
     fn test_tick_running() {
+        let now = time::Instant::now();
+        let time_prov = MockTimeProvider::new(now);
         let dur = time::Duration::new(TOTAL_SECS, 0);
-        let update_time = time::Instant::now() - time::Duration::new(1, 0);
+        let target = time::Duration::new(TOTAL_SECS - 1, 0);
         let timer = Timer {
-            last_update: update_time,
+            time_provider: time_prov,
+            last_update: now,
             duration: dur, 
             state: TimerState::Running,
         };
 
-        // TODO: Implement a Mock Interface for Time 
-//        std::thread::sleep(dur);
-//        let timer = timer.tick();
-//        let delta = timer.tick_time - timer.base_time;
-//
-//        assert_eq!(delta.as_secs(), dur.as_secs());
+        let timer = timer.tick();
+
+        let result = timer.duration;
+
+        assert_eq!(target.as_secs(), result.as_secs());
     }
 
     #[test]
     fn test_tick_paused() {
-        let dur = time::Duration::new(2, 0);
         let now = time::Instant::now();
+        let time_prov = MockTimeProvider::new(now);
+        let dur = time::Duration::new(TOTAL_SECS, 0);
         let timer = Timer {
+            time_provider: time_prov,
             last_update: now,
             duration: dur,
             state: TimerState::Paused,
         };
 
-        // TODO: Implement a Mock Interface for Time 
-  //      std::thread::sleep(dur);
-  //      let timer = timer.tick();
-  //      let delta = timer.tick_time - timer.base_time;
+        let timer = timer.tick();
 
-  //      assert_eq!(delta.as_secs(), 0 );
+        let result = timer.duration;
+
+        assert_eq!(result.as_secs(), dur.as_secs());
     }
 }
