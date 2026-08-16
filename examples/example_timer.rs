@@ -6,15 +6,13 @@ use std::thread::sleep;
 use rclock::utils::timer::Timer;
 
 fn main() {
-    let timer = Timer::from_now().run();
+    let target_duration = Duration::new(60, 0);
+    let timer = Timer::new(target_duration).run();
     let sleep_time = Duration::new(1, 0); 
-    loop {
+    
+    for _ in 1..60 {
         let timer = timer.tick();
         print!("{}\n", timer);
         sleep(sleep_time);
-       
-        if timer.duration().as_secs() > 5 {
-            break;
-        }
     }
 }
