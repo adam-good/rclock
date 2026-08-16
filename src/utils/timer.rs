@@ -2,14 +2,14 @@
 mod timestamp;
 mod time_provider;
 use timestamp::{Timestamp};
-use time_provider::{Foo, TimeProvider, RealTimeProvider};
+use time_provider::{TimeProviderExt, TimeProvider, RealTimeProvider};
 use std::time;
 use std::fmt::Display;
 
 pub type Timer = GenericTimer<RealTimeProvider>;
 
 #[derive(Debug)]
-pub struct GenericTimer<T: Foo> {
+pub struct GenericTimer<T: TimeProviderExt> {
     time_provider: T, 
     last_update: time::Instant,
     duration: time::Duration,
@@ -22,7 +22,7 @@ enum TimerState {
     Paused,
 }
 
-impl<T: Foo> Display for GenericTimer<T> {
+impl<T: TimeProviderExt> Display for GenericTimer<T> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let timestamp = self.get_timestamp();
         write!(f, "{}", timestamp)
@@ -30,7 +30,7 @@ impl<T: Foo> Display for GenericTimer<T> {
 }
 
 impl GenericTimer<RealTimeProvider> {
-    pub fn new(duration: time::Duration) -> GenericTimer<RealTimeProvider> {
+    pub fn new(duration: time::Duration) -> Self {
         let mut provider = RealTimeProvider;
         let now = provider.now();
         GenericTimer {
@@ -42,7 +42,7 @@ impl GenericTimer<RealTimeProvider> {
     } 
 }
 
-impl<T: Foo> GenericTimer<T> {
+impl<T: TimeProviderExt> GenericTimer<T> {
     pub fn get_timestamp(&self) -> Timestamp {
         Timestamp::from_secs(self.duration.as_secs())
     }
@@ -114,12 +114,13 @@ mod tests {
             MockTimeProvider { init_time: init_time, ticks: 0 }
         }
     }
-    impl Foo for MockTimeProvider {
+    impl TimeProvider for MockTimeProvider {
         fn now(&mut self) -> std::time::Instant {
             self.ticks += 1;
             self.init_time + time::Duration::new(self.ticks, 0)
         }
     }
+    impl TimeProviderExt for MockTimeProvider {}
 
     #[test]
     fn test_new() {

@@ -11,10 +11,6 @@ impl TimeProvider for RealTimeProvider {
     }
 }
 
-pub trait Foo: TimeProvider + Clone + Copy {
-    
-}
+pub trait TimeProviderExt: TimeProvider + Clone + Copy { }
 
-impl Foo for RealTimeProvider {
-    
-}
+impl TimeProviderExt for RealTimeProvider {}
