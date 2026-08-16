@@ -1,24 +1,15 @@
 
 mod timestamp;
+mod time_provider;
 use timestamp::{Timestamp};
+use time_provider::{Foo, TimeProvider, RealTimeProvider};
 use std::time;
 use std::fmt::Display;
 
-pub trait TimeProvider {
-    fn now(&mut self) -> std::time::Instant;
-}
-
-#[derive(Clone, Copy)]
-pub struct RealTimeProvider;
-
-impl TimeProvider for RealTimeProvider {
-    fn now(&mut self) -> std::time::Instant {
-        std::time::Instant::now()
-    }
-}
+pub type Timer = GenericTimer<RealTimeProvider>;
 
 #[derive(Debug)]
-pub struct Timer<T: TimeProvider> {
+pub struct GenericTimer<T: Foo> {
     time_provider: T, 
     last_update: time::Instant,
     duration: time::Duration,
@@ -31,30 +22,33 @@ enum TimerState {
     Paused,
 }
 
-impl<T: TimeProvider> Display for Timer<T> {
+impl<T: Foo> Display for GenericTimer<T> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let timestamp = self.get_timestamp();
         write!(f, "{}", timestamp)
     }
 }
 
-impl<T: TimeProvider> Timer<T> {
-    pub fn new(mut time_provider: T, duration: time::Duration) -> Timer<T> {
-        let now = time_provider.now();
-        Timer {
-            time_provider: time_provider,
+impl GenericTimer<RealTimeProvider> {
+    pub fn new(duration: time::Duration) -> GenericTimer<RealTimeProvider> {
+        let mut provider = RealTimeProvider;
+        let now = provider.now();
+        GenericTimer {
+            time_provider: provider,
             last_update: now,
             duration: duration,
-            state: TimerState::Paused,
+            state: TimerState::Paused
         }
-    }
+    } 
+}
 
+impl<T: Foo> GenericTimer<T> {
     pub fn get_timestamp(&self) -> Timestamp {
         Timestamp::from_secs(self.duration.as_secs())
     }
 
-    pub fn run(self) -> Timer<T> {
-        Timer {
+    pub fn run(self) -> GenericTimer<T> {
+        GenericTimer {
             time_provider: self.time_provider,
             last_update: self.last_update,
             duration: self.duration,
@@ -62,8 +56,8 @@ impl<T: TimeProvider> Timer<T> {
         }
     }
 
-    pub fn pause(self) -> Timer<T> {
-        Timer {
+    pub fn pause(self) -> GenericTimer<T> {
+        GenericTimer {
             time_provider: self.time_provider,
             last_update: self.last_update,
             duration: self.duration,
@@ -71,18 +65,18 @@ impl<T: TimeProvider> Timer<T> {
         }
     }
 
-    pub fn tick(self) -> Timer<T> {
+    pub fn tick(&self) -> GenericTimer<T> {
         let mut time_provider = self.time_provider;
         let now = time_provider.now();
         let delta = now - self.last_update;
         match self.state { 
-            TimerState::Paused => Timer {
+            TimerState::Paused => GenericTimer {
                 time_provider: time_provider,
                 last_update: now,
                 duration: self.duration,
                 state: self.state
             },
-            TimerState::Running => Timer {
+            TimerState::Running => GenericTimer {
                 time_provider: time_provider,
                 last_update: now, 
                 duration: self.duration - delta,
@@ -109,6 +103,7 @@ mod tests {
                             (MINUTES * SECS_PER_MINUTE) +
                             SECONDS;
 
+    #[derive(Clone, Copy, Debug)]
     struct MockTimeProvider {
         init_time: time::Instant,
         ticks: u64,
@@ -119,7 +114,7 @@ mod tests {
             MockTimeProvider { init_time: init_time, ticks: 0 }
         }
     }
-    impl TimeProvider for MockTimeProvider {
+    impl Foo for MockTimeProvider {
         fn now(&mut self) -> std::time::Instant {
             self.ticks += 1;
             self.init_time + time::Duration::new(self.ticks, 0)
@@ -128,10 +123,8 @@ mod tests {
 
     #[test]
     fn test_new() {
-        let now = time::Instant::now();
-        let time_provider = MockTimeProvider::new(now);
         let dur = time::Duration::new(TOTAL_SECS, 0);
-        let timer = Timer::new(time_provider, dur);
+        let timer = GenericTimer::new(dur);
         assert_eq!(timer.duration, dur);
         assert_eq!(timer.state, TimerState::Paused);
     }
@@ -141,7 +134,7 @@ mod tests {
         let now = time::Instant::now();
         let time_prov = MockTimeProvider::new(now);
         let dur = time::Duration::new(TOTAL_SECS, 0);
-        let timer = Timer {
+        let timer = GenericTimer {
             time_provider: time_prov,
             last_update: now,
             duration: dur,
@@ -159,7 +152,7 @@ mod tests {
         let now = time::Instant::now();
         let time_prov = MockTimeProvider::new(now);
         let duration = time::Duration::new(TOTAL_SECS, 0);
-        let timer = Timer {
+        let timer = GenericTimer {
             time_provider: time_prov,
             last_update: now,
             duration: duration,
@@ -175,7 +168,7 @@ mod tests {
         let now = time::Instant::now();
         let time_prov = MockTimeProvider::new(now);
         let duration = time::Duration::new(TOTAL_SECS, 0);
-        let timer = Timer {
+        let timer = GenericTimer {
             time_provider: time_prov,
             last_update: now,
             duration: duration,
@@ -191,7 +184,7 @@ mod tests {
         let now = time::Instant::now();
         let time_prov = MockTimeProvider::new(now);
         let dur = time::Duration::new(TOTAL_SECS, 0);
-        let timer = Timer {
+        let timer = GenericTimer {
             time_provider: time_prov,
             last_update: now,
             duration: dur,
@@ -210,7 +203,7 @@ mod tests {
         let time_prov = MockTimeProvider::new(now);
         let dur = time::Duration::new(TOTAL_SECS, 0);
         let target = time::Duration::new(TOTAL_SECS - 1, 0);
-        let timer = Timer {
+        let timer = GenericTimer {
             time_provider: time_prov,
             last_update: now,
             duration: dur, 
@@ -229,7 +222,7 @@ mod tests {
         let now = time::Instant::now();
         let time_prov = MockTimeProvider::new(now);
         let dur = time::Duration::new(TOTAL_SECS, 0);
-        let timer = Timer {
+        let timer = GenericTimer {
             time_provider: time_prov,
             last_update: now,
             duration: dur,
