@@ -30,7 +30,7 @@ impl<T: Foo> Display for GenericTimer<T> {
 }
 
 impl GenericTimer<RealTimeProvider> {
-    pub fn new(duration: time::Duration) -> GenericTimer<RealTimeProvider> {
+    pub fn new(duration: time::Duration) -> Self {
         let mut provider = RealTimeProvider;
         let now = provider.now();
         GenericTimer {
@@ -114,12 +114,13 @@ mod tests {
             MockTimeProvider { init_time: init_time, ticks: 0 }
         }
     }
-    impl Foo for MockTimeProvider {
+    impl TimeProvider for MockTimeProvider {
         fn now(&mut self) -> std::time::Instant {
             self.ticks += 1;
             self.init_time + time::Duration::new(self.ticks, 0)
         }
     }
+    impl Foo for MockTimeProvider {}
 
     #[test]
     fn test_new() {
