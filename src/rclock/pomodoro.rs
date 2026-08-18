@@ -1,106 +1,79 @@
-use crate::rclock::timer;
-use chrono::{DateTime, TimeDelta, Utc};
-use std::collections::HashMap;
 use std::fmt;
 
-struct PomodoroRound {
-    work_time: TimeDelta,
-    break_time: TimeDelta,
-}
+mod timers;
+mod schedule;
+use schedule::PomoSchedule;
+use timers::{PomoTimer, PomoType};
 
-pub struct Pomodoro {
-    timer: Option<timer::Timer>,
-    round_cycle: HashMap<u16, PomodoroRound>,
+pub struct PomodoroRunner {
+    current_timer: PomoTimer,
+    schedule: PomoSchedule,
     round_counter: u16,
-    cycle_size: u16,
-    intent: Option<TimerIntent>,
     state: PomodoroState,
 }
 
-pub enum TimerIntent {
-    Work,
-    Break,
-}
-
+#[derive(Clone,Copy)]
 pub enum PomodoroState {
     Running,
     Paused,
 }
 
-impl Pomodoro {
-    pub fn new(n_rounds: &u16, work_times: &Vec<i64>, break_times: &Vec<i64>) -> Self {
-        let mut round_cycle_map: HashMap<u16, PomodoroRound> = HashMap::<u16, PomodoroRound>::new();
-        for round in 1..n_rounds + 1 {
-            let i: usize = usize::from(round) - 1;
-            let work_delta: TimeDelta = TimeDelta::new(work_times[i] * 60, 0).unwrap();
-            let break_delta: TimeDelta = TimeDelta::new(break_times[i] * 60, 0).unwrap();
-            round_cycle_map.insert(
-                round,
-                PomodoroRound {
-                    work_time: work_delta,
-                    break_time: break_delta,
-                },
-            );
-        }
-
+impl PomodoroRunner {
+    pub fn new(work_times: Vec<u64>, break_times: Vec<u64>) -> Self {
+        let schedule = PomoSchedule::from_vecs(work_times, break_times);
         Self {
-            timer: None,
-            round_cycle: round_cycle_map,
+            current_timer: schedule.current_timer(),
+            schedule,
             round_counter: 1,
-            cycle_size: *n_rounds,
-            intent: None,
             state: PomodoroState::Paused,
         }
     }
 
-    pub fn init(&mut self) {
-        self.round_counter = 1;
-        let round = self.round_cycle.get(&self.round_counter).unwrap();
-        self.timer = Some(timer::Timer::new(round.work_time));
-        self.intent = Some(TimerIntent::Work);
-    }
-
-    pub fn run(&mut self) {
-        if let None = self.timer {
-            self.init();
-        }
-
-        self.state = PomodoroState::Running;
-        match &mut self.timer {
-            Some(t) => t.run(),
-            None => panic!("Error: Pomorodor Has No Timer to Run"),
+    // NOTE: this will reset the timer according to the record in schedule
+    pub fn init(self) -> Self {
+        PomodoroRunner { 
+            current_timer: self.schedule.current_timer(), 
+            schedule: self.schedule, 
+            round_counter: self.round_counter, 
+            state: PomodoroState::Paused
         }
     }
 
-    pub fn pause(&mut self) {
-        self.state = PomodoroState::Paused;
-        match &mut self.timer {
-            Some(t) => t.pause(),
-            None => panic!("Error: Pomodoro Has No Timer to Pause"),
+    pub fn run(self) -> Self {
+        PomodoroRunner { 
+            current_timer: self.current_timer.run(),
+            schedule: self.schedule, 
+            round_counter: self.round_counter, 
+            state: PomodoroState::Running 
         }
     }
 
-    pub fn get_timer(&self) -> Option<&timer::Timer> {
-        match &self.timer {
-            Some(t) => Some(t),
-            None => None,
+    pub fn pause(self) -> Self {
+        PomodoroRunner {
+            current_timer: self.current_timer.pause(),
+            schedule: self.schedule,
+            round_counter: self.round_counter,
+            state: PomodoroState::Paused
         }
+    }
+
+    pub fn get_timer(&self) -> &PomoTimer {
+        &self.current_timer
     }
 
     pub fn get_round(&self) -> u16 {
         self.round_counter
     }
 
-    pub fn get_state(&self) -> &PomodoroState {
-        &self.state
+    pub fn get_state(&self) -> PomodoroState {
+        self.state
     }
 
+    // NOTE: YOU LEFT OFF HERE
+
     // TODO: This seems hacky. Probably needs improved
-    pub fn get_intent(&self) -> Option<&TimerIntent> {
-        match &self.intent {
-            Some(i) => Some(&i),
-            None => None,
-        }
+    pub fn get_pomo_type(&self) -> PomoType {
+        self.current_timer.get_type()
     }
 
     pub fn update(&mut self) {
@@ -119,7 +92,7 @@ impl Pomodoro {
                 TimerIntent::Work => {
                     let round_cycle_idx: u16 = (self.round_counter % self.cycle_size) + 1;
                     let round = self
-                        .round_cycle
+                        .schedule
                         .get(&round_cycle_idx)
                         .expect(format!("Can't Find Round for Index {}", round_cycle_idx).as_str());
                     self.timer = Some(timer::Timer::new(round.break_time));
@@ -130,7 +103,7 @@ impl Pomodoro {
                     let next_round_num: u16 = self.round_counter + 1;
                     let round_cycle_idx: u16 = (next_round_num % self.cycle_size) + 1;
                     let round: &PomodoroRound = self
-                        .round_cycle
+                        .schedule
                         .get(&round_cycle_idx)
                         .expect(format!("Can't find round for {}", round_cycle_idx).as_str());
                     self.timer = Some(timer::Timer::new(round.work_time));
@@ -143,7 +116,7 @@ impl Pomodoro {
     }
 }
 
-impl fmt::Display for Pomodoro {
+impl fmt::Display for PomodoroRunner {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let timer_str: String = match &self.timer {
             Some(t) => t.to_string(),

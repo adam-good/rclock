@@ -39,4 +39,4 @@ impl PomoSchedule {
                      .expect("Pomo Scheule Overflow");
         PomoTimer::from_record(record)
     }
- }
+}
