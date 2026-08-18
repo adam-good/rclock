@@ -3,7 +3,7 @@ use std::time::Duration;
 use rclock::utils::timer::Timer;
 
 #[derive(Clone,Copy)]
-enum PomoType {
+pub enum PomoType {
     Work,
     Rest,
 }
@@ -50,6 +50,10 @@ impl PomoTimer {
 
     pub fn from_record(record: &PomoRecord) -> Self {
         PomoTimer::new(record.duration, record.pomo_type)
+    }
+
+    pub fn get_type(&self) -> PomoType {
+        self.pomo_type
     }
 
     pub fn run(self) -> Self {
