@@ -51,5 +51,21 @@ impl PomoTimer {
     pub fn from_record(record: &PomoRecord) -> Self {
         PomoTimer::new(record.duration, record.pomo_type)
     }
+
+    pub fn run(self) -> Self {
+        Self { 
+            timer: self.timer.run(), 
+            pomo_type: self.pomo_type, 
+            state: PomoState::Running 
+        }
+    }
+
+    pub fn pause(self) -> Self {
+        Self { 
+            timer: self.timer.pause(),
+            pomo_type: self.pomo_type, 
+            state: PomoState::Paused 
+        }
+    }
 }
 
