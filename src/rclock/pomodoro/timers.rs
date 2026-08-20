@@ -71,5 +71,13 @@ impl PomoTimer {
             state: PomoState::Paused 
         }
     }
+
+    pub fn update(self) -> Self {
+        Self {
+            timer: self.timer.tick(),
+            pomo_type: self.pomo_type,
+            state: self.state
+        }
+    }
 }
 

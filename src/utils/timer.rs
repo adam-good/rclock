@@ -69,6 +69,8 @@ impl<T: TimeProviderExt> GenericTimer<T> {
         let mut time_provider = self.time_provider;
         let now = time_provider.now();
         let delta = now - self.last_update;
+        let delta = if delta < self.duration { delta }
+                    else { self.duration }; // Cap at 0; No negative time here!
         match self.state { 
             TimerState::Paused => GenericTimer {
                 time_provider: time_provider,

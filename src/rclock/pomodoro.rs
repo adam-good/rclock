@@ -69,21 +69,26 @@ impl PomodoroRunner {
         self.state
     }
 
-    // NOTE: YOU LEFT OFF HERE
-
-    // TODO: This seems hacky. Probably needs improved
     pub fn get_pomo_type(&self) -> PomoType {
         self.current_timer.get_type()
     }
 
-    pub fn update(&mut self) {
-        if let Some(timer) = &mut self.timer {
-            let default = DateTime::<Utc>::default();
-            let _ = timer.update(); //TODO: Should do something here
-            if (timer.time() - default).as_seconds_f32() < 0.5 {
-                self.cycle_timer();
-            }
+    pub fn update(self) -> Self {
+        Self {
+            current_timer: self.current_timer.update(),
+            schedule: self.schedule,
+            round_counter: self.round_counter,
+            state: self.state,
         }
+    }
+
+    pub fn advance_schedule(self) -> Self {
+        Self { 
+            current_timer: self.current_timer, 
+            schedule: self.schedule, 
+            round_counter: self.round_counter + 1, 
+            state: self.state
+        }.runner.init()
     }
 
     fn cycle_timer(&mut self) {

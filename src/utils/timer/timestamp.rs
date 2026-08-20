@@ -6,6 +6,7 @@ mod constants;
 pub use hour::Hour;
 pub use minute::Minute;
 pub use seconds::Second;
+use constants::{SECS_PER_HOUR, SECS_PER_MINUTE};
 
 use std::{fmt::Display};
 
@@ -39,5 +40,9 @@ impl Timestamp {
             minute: Minute::from_secs(secs), 
             second: Second::from_secs(secs) 
         }
+    }
+
+    pub fn to_secs(self) -> u64 {
+        self.hour * SECS_PER_HOUR + self.minute * SECS_PER_MINUTE + self.second 
     }
 }
