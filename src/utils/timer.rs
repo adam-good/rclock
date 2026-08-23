@@ -13,13 +13,20 @@ pub struct GenericTimer<T: TimeProviderExt> {
     time_provider: T, 
     last_update: time::Instant,
     duration: time::Duration,
-    state: TimerState,
+    run_state: RunState,
+    timer_state: TimerState,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+enum RunState {
+    Running,
+    Paused,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 enum TimerState {
-    Running,
-    Paused,
+    Active,
+    Expired,
 }
 
 impl<T: TimeProviderExt> Display for GenericTimer<T> {
@@ -37,7 +44,8 @@ impl GenericTimer<RealTimeProvider> {
             time_provider: provider,
             last_update: now,
             duration: duration,
-            state: TimerState::Paused
+            run_state: RunState::Paused,
+            timer_state: TimerState::Active
         }
     } 
 }
@@ -52,7 +60,8 @@ impl<T: TimeProviderExt> GenericTimer<T> {
             time_provider: self.time_provider,
             last_update: self.last_update,
             duration: self.duration,
-            state: TimerState::Running,
+            run_state: RunState::Running,
+            timer_state: self.timer_state
         }
     }
 
@@ -61,7 +70,8 @@ impl<T: TimeProviderExt> GenericTimer<T> {
             time_provider: self.time_provider,
             last_update: self.last_update,
             duration: self.duration,
-            state: TimerState::Paused, 
+            run_state: RunState::Paused,
+            timer_state: self.timer_state
         }
     }
 
@@ -69,20 +79,26 @@ impl<T: TimeProviderExt> GenericTimer<T> {
         let mut time_provider = self.time_provider;
         let now = time_provider.now();
         let delta = now - self.last_update;
-        let delta = if delta < self.duration { delta }
-                    else { self.duration }; // Cap at 0; No negative time here!
-        match self.state { 
-            TimerState::Paused => GenericTimer {
+        let delta = if delta <= self.duration { self.duration } else { delta };
+        match self.run_state { 
+            RunState::Paused => GenericTimer {
                 time_provider: time_provider,
                 last_update: now,
                 duration: self.duration,
-                state: self.state
+                run_state: self.run_state,
+                timer_state: self.timer_state
             },
-            TimerState::Running => GenericTimer {
-                time_provider: time_provider,
-                last_update: now, 
-                duration: self.duration - delta,
-                state: self.state 
+            RunState::Running => {
+                let diff  = self.duration - delta;
+                let state = if diff.as_secs() > 0 { TimerState::Active  }
+                            else { TimerState::Expired };
+                GenericTimer {
+                    time_provider: time_provider,
+                    last_update: now, 
+                    duration: diff, 
+                    run_state: self.run_state,
+                    timer_state: state
+                }
             },
         }
     }
@@ -90,7 +106,7 @@ impl<T: TimeProviderExt> GenericTimer<T> {
 
 // Unit Tests
 #[cfg(test)]
-mod tests {
+mod timer_tests {
     use super::*;
 
     // TODO: Import these from constants
@@ -129,7 +145,7 @@ mod tests {
         let dur = time::Duration::new(TOTAL_SECS, 0);
         let timer = GenericTimer::new(dur);
         assert_eq!(timer.duration, dur);
-        assert_eq!(timer.state, TimerState::Paused);
+        assert_eq!(timer.run_state, RunState::Paused);
     }
 
     #[test]
@@ -141,7 +157,8 @@ mod tests {
             time_provider: time_prov,
             last_update: now,
             duration: dur,
-            state: TimerState::Paused
+            run_state: RunState::Paused,
+            timer_state: TimerState::Active,
         };
 
         let restult = timer.to_string();
@@ -159,11 +176,12 @@ mod tests {
             time_provider: time_prov,
             last_update: now,
             duration: duration,
-            state: TimerState::Paused,
+            run_state: RunState::Paused,
+            timer_state: TimerState::Active,
         };
         let timer = timer.run();
 
-        assert_eq!(timer.state, TimerState::Running);
+        assert_eq!(timer.run_state, RunState::Running);
     }
 
     #[test]
@@ -175,11 +193,12 @@ mod tests {
             time_provider: time_prov,
             last_update: now,
             duration: duration,
-            state: TimerState::Running,
+            run_state: RunState::Running,
+            timer_state: TimerState::Active,
         };
         let timer = timer.pause();
 
-        assert_eq!(timer.state, TimerState::Paused);
+        assert_eq!(timer.run_state, RunState::Paused);
     }
 
     #[test]
@@ -191,7 +210,8 @@ mod tests {
             time_provider: time_prov,
             last_update: now,
             duration: dur,
-            state: TimerState::Paused,
+            run_state: RunState::Paused,
+            timer_state: TimerState::Active,
         };
 
         let result = timer.get_timestamp();
@@ -210,7 +230,8 @@ mod tests {
             time_provider: time_prov,
             last_update: now,
             duration: dur, 
-            state: TimerState::Running,
+            run_state: RunState::Running,
+            timer_state: TimerState::Active,
         };
 
         let timer = timer.tick();
@@ -229,7 +250,8 @@ mod tests {
             time_provider: time_prov,
             last_update: now,
             duration: dur,
-            state: TimerState::Paused,
+            run_state: RunState::Paused,
+            timer_state: TimerState::Active,
         };
 
         let timer = timer.tick();
@@ -237,5 +259,24 @@ mod tests {
         let result = timer.duration;
 
         assert_eq!(result.as_secs(), dur.as_secs());
+    }
+
+    #[test]
+    fn test_tick_exire() {
+        let now = time::Instant::now();
+        let time_prov = MockTimeProvider::new(now);
+        let dur = time::Duration::new(0, 0);
+        let timer = GenericTimer {
+            time_provider: time_prov,
+            last_update: now,
+            duration: dur,
+            run_state: RunState::Running,
+            timer_state: TimerState::Active,
+        };
+
+        let timer = timer.tick();
+        let result = timer.timer_state;
+
+        assert_eq!(result, TimerState::Expired);
     }
 }

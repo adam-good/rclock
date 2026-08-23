@@ -43,6 +43,8 @@ impl Timestamp {
     }
 
     pub fn to_secs(self) -> u64 {
-        self.hour * SECS_PER_HOUR + self.minute * SECS_PER_MINUTE + self.second 
+        self.hour.value   * SECS_PER_HOUR + 
+        self.minute.value * SECS_PER_MINUTE + 
+        self.second.value 
     }
 }

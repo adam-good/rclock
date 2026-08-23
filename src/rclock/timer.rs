@@ -3,26 +3,26 @@ use chrono::{DateTime, Local, TimeDelta, Utc};
 use std::fmt;
 use std::io;
 
-pub struct Timer {
+pub struct _Timer {
     last_update: DateTime<Local>,
     target: TimeDelta,
     delta: TimeDelta,
-    state: TimerState,
+    state: _TimerState,
 }
 
 #[derive(Eq, PartialEq)]
-enum TimerState {
+enum _TimerState {
     Running,
     Paused,
 }
 
-impl Timer {
-    pub fn new(target: TimeDelta) -> Self {
-        Timer {
+impl _Timer {
+    pub fn _new(target: TimeDelta) -> Self {
+        _Timer {
             last_update: Local::now(),
             target: target,
             delta: target,
-            state: TimerState::Paused,
+            state: _TimerState::Paused,
         }
     }
 
@@ -36,34 +36,34 @@ impl Timer {
     }
     */
 
-    pub fn run(&mut self) {
+    pub fn _run(&mut self) {
         self.last_update = Local::now();
-        self.state = TimerState::Running;
+        self.state = _TimerState::Running;
     }
 
-    pub fn pause(&mut self) {
-        self.state = TimerState::Paused;
+    pub fn _pause(&mut self) {
+        self.state = _TimerState::Paused;
     }
 
-    pub fn update(&mut self) -> io::Result<()> {
+    pub fn _update(&mut self) -> io::Result<()> {
         // TODO: Is there better syntax for this?
         match self.state {
-            TimerState::Running => {
+            _TimerState::Running => {
                 let update_time: DateTime<Local> = Local::now();
                 let offset: TimeDelta = update_time - self.last_update;
                 self.delta = self.delta - offset;
                 self.last_update = update_time;
                 Ok(())
             }
-            TimerState::Paused => Ok(()),
+            _TimerState::Paused => Ok(()),
         }
     }
 
-    pub fn time(&self) -> DateTime<Utc> {
+    pub fn _time(&self) -> DateTime<Utc> {
         DateTime::<Utc>::default() + self.delta
     }
 
-    pub fn get_perc(&self) -> f32 {
+    pub fn _get_perc(&self) -> f32 {
         let delta = self.delta.as_seconds_f32();
         let target = self.target.as_seconds_f32();
 
@@ -71,8 +71,9 @@ impl Timer {
     }
 }
 
-impl fmt::Display for Timer {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", (self.time().format("%H:%M:%S")))
+impl fmt::Display for _Timer {
+    fn fmt(&self, _f: &mut fmt::Formatter) -> fmt::Result {
+        unimplemented!()
+        //write!(f, "{}", (self.time().format("%H:%M:%S")))
     }
 }

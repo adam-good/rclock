@@ -1,4 +1,4 @@
 pub mod app;
-mod pomodoro;
+pub mod pomodoro;
 mod timer;
 pub mod ui;
