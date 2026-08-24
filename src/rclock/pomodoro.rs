@@ -74,11 +74,17 @@ impl PomodoroRunner {
     }
 
     pub fn update(self) -> Self {
+        let pomo = if self.current_timer.is_finished() {
+            self.advance_schedule().pause()
+        } else {
+            self
+        };
+
         Self {
-            current_timer: self.current_timer.update(),
-            schedule: self.schedule,
-            round_counter: self.round_counter,
-            state: self.state,
+            current_timer: pomo.current_timer.update(),
+            schedule: pomo.schedule,
+            round_counter: pomo.round_counter,
+            state: pomo.state,
         }
     }
 
@@ -89,36 +95,6 @@ impl PomodoroRunner {
             round_counter: self.round_counter + 1, 
             state: self.state
         }.init()
-    }
-
-    fn _cycle_timer(&mut self) {
-        unimplemented!()
-//        if let Some(intent) = &self.intent {
-//            match intent {
-//                TimerIntent::Work => {
-//                    let round_cycle_idx: u16 = (self.round_counter % self.cycle_size) + 1;
-//                    let round = self
-//                        .schedule
-//                        .get(&round_cycle_idx)
-//                        .expect(format!("Can't Find Round for Index {}", round_cycle_idx).as_str());
-//                    self.timer = Some(timer::Timer::new(round.break_time));
-//                    self.intent = Some(TimerIntent::Break);
-//                    self.run();
-//                }
-//                TimerIntent::Break => {
-//                    let next_round_num: u16 = self.round_counter + 1;
-//                    let round_cycle_idx: u16 = (next_round_num % self.cycle_size) + 1;
-//                    let round: &PomodoroRound = self
-//                        .schedule
-//                        .get(&round_cycle_idx)
-//                        .expect(format!("Can't find round for {}", round_cycle_idx).as_str());
-//                    self.timer = Some(timer::Timer::new(round.work_time));
-//                    self.intent = Some(TimerIntent::Work);
-//                    self.round_counter = next_round_num;
-//                    self.run();
-//                }
-//            }
-//        }
     }
 }
 
