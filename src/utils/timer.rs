@@ -24,7 +24,7 @@ enum RunState {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq)]
-enum TimerState {
+pub enum TimerState {
     Active,
     Expired,
 }
@@ -101,6 +101,10 @@ impl<T: TimeProviderExt> GenericTimer<T> {
                 }
             },
         }
+    }
+
+    pub fn get_state(&self) -> TimerState {
+        self.timer_state
     }
 }
 
@@ -278,5 +282,24 @@ mod timer_tests {
         let result = timer.timer_state;
 
         assert_eq!(result, TimerState::Expired);
+    }
+
+    #[test]
+    fn test_get_state_active() {
+        let now = time::Instant::now();
+        let time_provider = MockTimeProvider::new(now);
+        let dur = time::Duration::new(TOTAL_SECS, 0);
+        let timer = GenericTimer {
+            time_provider: time_provider,
+            last_update: now,
+            duration: dur,
+            run_state: RunState::Running,
+            timer_state: TimerState::Active
+        };
+
+        let result = timer.get_state();
+        let target = TimerState::Active;
+
+        assert_eq!(result, target);
     }
 }
