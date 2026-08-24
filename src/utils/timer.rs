@@ -79,7 +79,7 @@ impl<T: TimeProviderExt> GenericTimer<T> {
         let mut time_provider = self.time_provider;
         let now = time_provider.now();
         let delta = now - self.last_update;
-        let delta = if delta <= self.duration { self.duration } else { delta };
+        let delta = if delta > self.duration { self.duration } else { delta };
         match self.run_state { 
             RunState::Paused => GenericTimer {
                 time_provider: time_provider,
@@ -91,7 +91,7 @@ impl<T: TimeProviderExt> GenericTimer<T> {
             RunState::Running => {
                 let diff  = self.duration - delta;
                 let state = if diff.as_secs() > 0 { TimerState::Active  }
-                            else { TimerState::Expired };
+                            else                  { TimerState::Expired };
                 GenericTimer {
                     time_provider: time_provider,
                     last_update: now, 
