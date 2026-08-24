@@ -2,7 +2,7 @@
 use std::time::Duration;
 use crate::utils::timer::{Timer, TimerState};
 
-#[derive(Clone,Copy)]
+#[derive(Debug,PartialEq,Clone,Copy)]
 pub enum PomoType {
     Work,
     Rest,
@@ -85,3 +85,37 @@ impl PomoTimer {
     }
 }
 
+#[cfg(test)]
+mod pomo_timer_tests {
+    use super::*;
+    use std::time::Duration;
+
+    #[test]
+    fn test_new() {
+        let duration = Duration::new(10, 0);
+        let pomo_type = PomoType::Work;
+        let timer = PomoTimer::new(duration, pomo_type);
+
+        let _target_timer = Timer::new(duration);
+        let target_type  = PomoType::Work;
+
+        //;assert_eq!(timer.timer, target_timer); // TODO: THis
+        assert_eq!(timer.pomo_type, target_type);
+    }
+
+    #[test]
+    fn test_new_work() {
+        let duration = Duration::new(10, 0);
+        let timer = PomoTimer::new_work(duration);
+
+        assert_eq!(timer.pomo_type, PomoType::Work);
+    }
+
+    #[test]
+    fn test_new_rest() {
+        let duration = Duration::new(10, 0);
+        let timer = PomoTimer::new_rest(duration);
+
+        assert_eq!(timer.pomo_type, PomoType::Rest);
+    }
+}
