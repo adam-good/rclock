@@ -1,6 +1,6 @@
 
 use std::time::Duration;
-use rclock::utils::timer::Timer;
+use crate::utils::timer::Timer;
 
 #[derive(Clone,Copy)]
 pub enum PomoType {
