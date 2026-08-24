@@ -1,6 +1,6 @@
 
 use std::time::Duration;
-use crate::utils::timer::Timer;
+use crate::utils::timer::{Timer, TimerState};
 
 #[derive(Clone,Copy)]
 pub enum PomoType {
@@ -78,6 +78,10 @@ impl PomoTimer {
             pomo_type: self.pomo_type,
             state: self.state
         }
+    }
+
+    pub fn is_finished(&self) -> bool {
+        self.timer.get_state() == TimerState::Expired
     }
 }
 
