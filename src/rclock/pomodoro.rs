@@ -91,7 +91,7 @@ impl PomodoroRunner {
         }.init()
     }
 
-    fn cycle_timer(&mut self) {
+    fn _cycle_timer(&mut self) {
         unimplemented!()
 //        if let Some(intent) = &self.intent {
 //            match intent {

@@ -9,7 +9,7 @@ pub struct PomoSchedule {
 }
 
 impl PomoSchedule {
-    pub fn new(pomos: Vec<PomoRecord>) -> Self {
+    pub fn _new(pomos: Vec<PomoRecord>) -> Self {
         Self { pomos, current: 0 }
     }
 
@@ -26,7 +26,7 @@ impl PomoSchedule {
         PomoSchedule { pomos: records, current: 0 }
     }
 
-    pub fn inc(self) -> Self {
+    pub fn _inc(self) -> Self {
         Self { pomos: self.pomos, current: self.current+1 }
     }
 
