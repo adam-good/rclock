@@ -129,4 +129,19 @@ mod pomo_timer_tests {
         assert_eq!(pomo_timer.timer.get_duration(), duration);
         assert_eq!(pomo_timer.pomo_type, pomo_type);
     }
+
+    #[test]
+    fn test_get_type() {
+        let duration = Duration::new(10, 0);
+        let pomo_timer = PomoTimer {
+            timer: Timer::new(duration),
+            pomo_type: PomoType::Work,
+            state: PomoState::Running
+        };
+
+        let result = pomo_timer.get_type();
+        let target = PomoType::Work;
+
+        assert_eq!(result, target);
+    }
 }
