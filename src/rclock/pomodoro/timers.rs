@@ -8,6 +8,7 @@ pub enum PomoType {
     Rest,
 }
 
+#[derive(Debug, PartialEq)]
 enum PomoState {
     Running,
     Paused,
@@ -143,5 +144,47 @@ mod pomo_timer_tests {
         let target = PomoType::Work;
 
         assert_eq!(result, target);
+    }
+
+    #[test]
+    fn test_run() {
+        let duration = Duration::new(10, 0);
+        let pomo_timer_running = PomoTimer {
+            timer: Timer::new(duration),
+            pomo_type: PomoType::Work,
+            state: PomoState::Running
+        };
+        let pomo_timer_paused = PomoTimer {
+            timer: Timer::new(duration),
+            pomo_type: PomoType::Work,
+            state: PomoState::Paused
+        };
+        let result_running = pomo_timer_running.run().state;
+        let result_paused  = pomo_timer_paused.run().state;
+        let target = PomoState::Running;
+
+        assert_eq!(result_running, target);
+        assert_eq!(result_paused,  target);
+    }
+
+    #[test]
+    fn test_pause() {
+        let duration = Duration::new(10, 0);
+        let pomo_timer_running = PomoTimer {
+            timer: Timer::new(duration),
+            pomo_type: PomoType::Work,
+            state: PomoState::Running
+        };
+        let pomo_timer_paused = PomoTimer {
+            timer: Timer::new(duration),
+            pomo_type: PomoType::Work,
+            state: PomoState::Paused,
+        };
+        let result_running = pomo_timer_running.pause().state;
+        let result_paused  = pomo_timer_paused.pause().state;
+        let target = PomoState::Paused;
+
+        assert_eq!(result_running, target);
+        assert_eq!(result_paused, target);
     }
 }
