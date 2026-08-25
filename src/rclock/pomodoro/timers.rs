@@ -187,4 +187,24 @@ mod pomo_timer_tests {
         assert_eq!(result_running, target);
         assert_eq!(result_paused, target);
     }
+
+    // TODO: Gonna have to rework stuff for mocks
+    #[test]
+    fn test_update() {
+        //let duration = Duration::new(10, 0);
+        //let timer = Timer::new(duration);
+        //let pomo_timer = PomoTimer {
+        //    timer: timer, 
+        //    pomo_type: PomoType::Work,
+        //    state: PomoState::Running,
+        //};
+
+        //let target_timer = PomoTimer {
+        //    timer: timer,
+        //    pomo_type: PomoType::Work,
+        //    state: PomoState::Running
+        //};
+        //let result = pomo_timer.update();
+
+    }
 }
