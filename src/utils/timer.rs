@@ -29,6 +29,15 @@ pub enum TimerState {
     Expired,
 }
 
+impl<T: TimeProviderExt> PartialEq for GenericTimer<T> {
+    fn eq(&self, other: &Self) -> bool {
+        self.last_update   == other.last_update   &&
+        self.duration      == other.duration      &&
+        self.run_state     == other.run_state     &&
+        self.timer_state   == other.timer_state 
+    }
+}
+
 impl<T: TimeProviderExt> Display for GenericTimer<T> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let timestamp = self.get_timestamp();
@@ -101,6 +110,10 @@ impl<T: TimeProviderExt> GenericTimer<T> {
                 }
             },
         }
+    }
+
+    pub fn get_duration(&self) -> time::Duration {
+        self.duration
     }
 
     pub fn get_state(&self) -> TimerState {
