@@ -94,13 +94,13 @@ mod pomo_timer_tests {
     fn test_new() {
         let duration = Duration::new(10, 0);
         let pomo_type = PomoType::Work;
-        let timer = PomoTimer::new(duration, pomo_type);
+        let pomo_timer = PomoTimer::new(duration, pomo_type);
 
-        let _target_timer = Timer::new(duration);
+        let target_timer = Timer::new(duration);
         let target_type  = PomoType::Work;
 
-        //;assert_eq!(timer.timer, target_timer); // TODO: THis
-        assert_eq!(timer.pomo_type, target_type);
+        assert_eq!(pomo_timer.timer.get_duration(), target_timer.get_duration()); 
+        assert_eq!(pomo_timer.pomo_type, target_type);
     }
 
     #[test]
