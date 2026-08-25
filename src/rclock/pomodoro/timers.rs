@@ -118,4 +118,15 @@ mod pomo_timer_tests {
 
         assert_eq!(timer.pomo_type, PomoType::Rest);
     }
+
+    #[test]
+    fn test_from_record() {
+        let duration = Duration::new(10, 0);
+        let pomo_type = PomoType::Work;
+        let record = PomoRecord::new(duration, pomo_type);
+        let pomo_timer = PomoTimer::from_record(&record);
+
+        assert_eq!(pomo_timer.timer.get_duration(), duration);
+        assert_eq!(pomo_timer.pomo_type, pomo_type);
+    }
 }
