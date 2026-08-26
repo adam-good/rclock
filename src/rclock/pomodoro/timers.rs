@@ -1,6 +1,6 @@
 
 use std::time::Duration;
-use crate::utils::timer::{Timer, TimerState};
+use crate::utils::timer::{DefaultTimer, RealTimeProvider, TimeProvider, Timer, TimerState, new_default};
 
 #[derive(Debug,PartialEq,Clone,Copy)]
 pub enum PomoType {
@@ -32,15 +32,19 @@ impl PomoRecord {
     }
 }
 
-pub struct PomoTimer {
-    timer: Timer,
+pub struct PomoTimer<T=DefaultTimer> {
+    timer: T,
     pomo_type: PomoType,
     state: PomoState,
 }
 
-impl PomoTimer {
+impl<T: Timer> PomoTimer<T> {
     pub fn new(duration: Duration, pomo_type: PomoType) -> Self {
-        Self { timer: Timer::new(duration), pomo_type, state: PomoState::Paused }
+        Self {
+            timer: new_default(duration),
+            pomo_type, 
+            state: PomoState::Paused 
+        }
     }
     pub fn new_work(duration: Duration) -> Self {
         Self::new(duration, PomoType::Work)
@@ -97,7 +101,7 @@ mod pomo_timer_tests {
         let pomo_type = PomoType::Work;
         let pomo_timer = PomoTimer::new(duration, pomo_type);
 
-        let target_timer = Timer::new(duration);
+        let target_timer = DefaultTimer::new(duration);
         let target_type  = PomoType::Work;
 
         assert_eq!(pomo_timer.timer.get_duration(), target_timer.get_duration()); 
@@ -135,7 +139,7 @@ mod pomo_timer_tests {
     fn test_get_type() {
         let duration = Duration::new(10, 0);
         let pomo_timer = PomoTimer {
-            timer: Timer::new(duration),
+            timer: DefaultTimer::new(duration),
             pomo_type: PomoType::Work,
             state: PomoState::Running
         };
@@ -150,12 +154,12 @@ mod pomo_timer_tests {
     fn test_run() {
         let duration = Duration::new(10, 0);
         let pomo_timer_running = PomoTimer {
-            timer: Timer::new(duration),
+            timer: DefaultTimer::new(duration),
             pomo_type: PomoType::Work,
             state: PomoState::Running
         };
         let pomo_timer_paused = PomoTimer {
-            timer: Timer::new(duration),
+            timer: DefaultTimer::new(duration),
             pomo_type: PomoType::Work,
             state: PomoState::Paused
         };
@@ -171,12 +175,12 @@ mod pomo_timer_tests {
     fn test_pause() {
         let duration = Duration::new(10, 0);
         let pomo_timer_running = PomoTimer {
-            timer: Timer::new(duration),
+            timer: DefaultTimer::new(duration),
             pomo_type: PomoType::Work,
             state: PomoState::Running
         };
         let pomo_timer_paused = PomoTimer {
-            timer: Timer::new(duration),
+            timer: DefaultTimer::new(duration),
             pomo_type: PomoType::Work,
             state: PomoState::Paused,
         };

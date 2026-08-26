@@ -2,14 +2,22 @@
 mod timestamp;
 mod time_provider;
 use timestamp::{Timestamp};
-use time_provider::{TimeProviderExt, TimeProvider, RealTimeProvider};
 use std::time;
 use std::fmt::Display;
+pub use time_provider::{TimeProvider, RealTimeProvider};
 
-pub type Timer = GenericTimer<RealTimeProvider>;
+pub trait Timer<T: TimeProvider> {
+    fn new(duration: time::Duration, provider: T) -> Self;
+    fn run(self) -> Self;
+    fn pause(self) -> Self;
+    fn tick(self) -> Self;
+    fn get_timestamp(&self) -> Timestamp;
+    fn get_duration(&self) -> time::Duration;
+    fn get_state(&self) -> TimerState;
+}
 
 #[derive(Debug)]
-pub struct GenericTimer<T: TimeProviderExt> {
+struct GenericTimer<T: TimeProvider> {
     time_provider: T, 
     last_update: time::Instant,
     duration: time::Duration,
@@ -29,7 +37,7 @@ pub enum TimerState {
     Expired,
 }
 
-impl<T: TimeProviderExt> PartialEq for GenericTimer<T> {
+impl<T: TimeProvider> PartialEq for GenericTimer<T> {
     fn eq(&self, other: &Self) -> bool {
         self.last_update   == other.last_update   &&
         self.duration      == other.duration      &&
@@ -38,33 +46,30 @@ impl<T: TimeProviderExt> PartialEq for GenericTimer<T> {
     }
 }
 
-impl<T: TimeProviderExt> Display for GenericTimer<T> {
+impl<T: TimeProvider> Display for GenericTimer<T> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let timestamp = self.get_timestamp();
         write!(f, "{}", timestamp)
     }
 }
 
-impl GenericTimer<RealTimeProvider> {
-    pub fn new(duration: time::Duration) -> Self {
-        let mut provider = RealTimeProvider;
+impl<T: TimeProvider> Timer<T> for GenericTimer<T> {
+    fn new(duration: time::Duration, mut provider: T) -> Self {
         let now = provider.now();
         GenericTimer {
             time_provider: provider,
             last_update: now,
-            duration: duration,
+            duration,
             run_state: RunState::Paused,
             timer_state: TimerState::Active
         }
-    } 
-}
-
-impl<T: TimeProviderExt> GenericTimer<T> {
-    pub fn get_timestamp(&self) -> Timestamp {
+    }
+    
+    fn get_timestamp(&self) -> Timestamp {
         Timestamp::from_secs(self.duration.as_secs())
     }
 
-    pub fn run(self) -> GenericTimer<T> {
+    fn run(self) -> Self {
         GenericTimer {
             time_provider: self.time_provider,
             last_update: self.last_update,
@@ -74,7 +79,7 @@ impl<T: TimeProviderExt> GenericTimer<T> {
         }
     }
 
-    pub fn pause(self) -> GenericTimer<T> {
+    fn pause(self) -> GenericTimer<T> {
         GenericTimer {
             time_provider: self.time_provider,
             last_update: self.last_update,
@@ -84,7 +89,7 @@ impl<T: TimeProviderExt> GenericTimer<T> {
         }
     }
 
-    pub fn tick(&self) -> GenericTimer<T> {
+    fn tick(self) -> GenericTimer<T> {
         let mut time_provider = self.time_provider;
         let now = time_provider.now();
         let delta = now - self.last_update;
@@ -112,19 +117,25 @@ impl<T: TimeProviderExt> GenericTimer<T> {
         }
     }
 
-    pub fn get_duration(&self) -> time::Duration {
+    fn get_duration(&self) -> time::Duration {
         self.duration
     }
 
-    pub fn get_state(&self) -> TimerState {
+    fn get_state(&self) -> TimerState {
         self.timer_state
     }
+}
+
+pub type DefaultTimer = GenericTimer<RealTimeProvider>;
+pub fn new_default(duration: time::Duration) -> impl Timer<RealTimeProvider> {
+    GenericTimer::new(duration, RealTimeProvider) 
 }
 
 // Unit Tests
 #[cfg(test)]
 mod timer_tests {
     use super::*;
+    use time_provider::TimeProvider;
 
     // TODO: Import these from constants
     const SECS_PER_MINUTE: u64 = 60;
@@ -155,12 +166,13 @@ mod timer_tests {
             self.init_time + time::Duration::new(self.ticks, 0)
         }
     }
-    impl TimeProviderExt for MockTimeProvider {}
 
     #[test]
     fn test_new() {
+        let now = time::Instant::now();
+        let provider = MockTimeProvider::new(now);
         let dur = time::Duration::new(TOTAL_SECS, 0);
-        let timer = GenericTimer::new(dur);
+        let timer = GenericTimer::new(dur, provider);
         assert_eq!(timer.duration, dur);
         assert_eq!(timer.run_state, RunState::Paused);
     }
