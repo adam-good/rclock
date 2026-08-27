@@ -127,7 +127,7 @@ impl<T: TimeProvider> Timer<T> for GenericTimer<T> {
 }
 
 pub type DefaultTimer = GenericTimer<RealTimeProvider>;
-pub fn new_default(duration: time::Duration) -> impl Timer<RealTimeProvider> {
+pub fn new_default(duration: time::Duration) -> DefaultTimer {
     GenericTimer::new(duration, RealTimeProvider) 
 }
 

@@ -1,6 +1,6 @@
 
 use std::time::Duration;
-use crate::utils::timer::{DefaultTimer, RealTimeProvider, TimeProvider, Timer, TimerState, new_default};
+use crate::utils::timer::{DefaultTimer, TimeProvider, Timer, TimerState, new_default};
 
 #[derive(Debug,PartialEq,Clone,Copy)]
 pub enum PomoType {
@@ -38,12 +38,12 @@ pub struct PomoTimer<T=DefaultTimer> {
     state: PomoState,
 }
 
-impl<T: Timer> PomoTimer<T> {
+impl PomoTimer<DefaultTimer> {
     pub fn new(duration: Duration, pomo_type: PomoType) -> Self {
         Self {
             timer: new_default(duration),
-            pomo_type, 
-            state: PomoState::Paused 
+            pomo_type,
+            state: PomoState::Paused
         }
     }
     pub fn new_work(duration: Duration) -> Self {
@@ -56,6 +56,33 @@ impl<T: Timer> PomoTimer<T> {
     pub fn from_record(record: &PomoRecord) -> Self {
         PomoTimer::new(record.duration, record.pomo_type)
     }
+}
+
+impl<T,U> PomoTimer<T>
+where
+    T: Timer<U> {
+
+
+impl<T,U: TimeProvider> PomoTimer<T>
+where
+    T: Timer<U> {
+//    pub fn new(duration: Duration, pomo_type: PomoType) -> Self {
+//        Self {
+//            timer: new_default(duration),
+//            pomo_type, 
+//            state: PomoState::Paused 
+//        }
+//    }
+//    pub fn new_work(duration: Duration) -> Self {
+//        Self::new(duration, PomoType::Work)
+//    }
+//    pub fn new_rest(duration: Duration) -> Self {
+//        Self::new(duration, PomoType::Rest)
+//    }
+//
+//    pub fn from_record(record: &PomoRecord) -> Self {
+//        PomoTimer::new(record.duration, record.pomo_type)
+//    }
 
     pub fn get_type(&self) -> PomoType {
         self.pomo_type
