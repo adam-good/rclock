@@ -41,7 +41,7 @@ pub struct PomoTimer<T=DefaultTimer> {
 impl PomoTimer<DefaultTimer> {
     pub fn new(duration: Duration, pomo_type: PomoType) -> Self {
         Self {
-            timer: DefaultTimer::new(duration),
+            timer: DefaultTimer::new_real(duration),
             pomo_type,
             state: PomoState::Paused
         }
@@ -103,7 +103,7 @@ mod pomo_timer_tests {
         let pomo_type = PomoType::Work;
         let pomo_timer = PomoTimer::new(duration, pomo_type);
 
-        let target_timer = DefaultTimer::new(duration);
+        let target_timer = DefaultTimer::new_real(duration);
         let target_type  = PomoType::Work;
 
         assert_eq!(pomo_timer.timer.get_duration(), target_timer.get_duration()); 
@@ -141,7 +141,7 @@ mod pomo_timer_tests {
     fn test_get_type() {
         let duration = Duration::new(10, 0);
         let pomo_timer = PomoTimer {
-            timer: DefaultTimer::new(duration),
+            timer: DefaultTimer::new_real(duration),
             pomo_type: PomoType::Work,
             state: PomoState::Running
         };
@@ -156,12 +156,12 @@ mod pomo_timer_tests {
     fn test_run() {
         let duration = Duration::new(10, 0);
         let pomo_timer_running = PomoTimer {
-            timer: DefaultTimer::new(duration),
+            timer: DefaultTimer::new_real(duration),
             pomo_type: PomoType::Work,
             state: PomoState::Running
         };
         let pomo_timer_paused = PomoTimer {
-            timer: DefaultTimer::new(duration),
+            timer: DefaultTimer::new_real(duration),
             pomo_type: PomoType::Work,
             state: PomoState::Paused
         };
@@ -177,12 +177,12 @@ mod pomo_timer_tests {
     fn test_pause() {
         let duration = Duration::new(10, 0);
         let pomo_timer_running = PomoTimer {
-            timer: DefaultTimer::new(duration),
+            timer: DefaultTimer::new_real(duration),
             pomo_type: PomoType::Work,
             state: PomoState::Running
         };
         let pomo_timer_paused = PomoTimer {
-            timer: DefaultTimer::new(duration),
+            timer: DefaultTimer::new_real(duration),
             pomo_type: PomoType::Work,
             state: PomoState::Paused,
         };

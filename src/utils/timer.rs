@@ -130,7 +130,7 @@ impl<T: TimeProvider> Timer for GenericTimer<T> {
 
 pub type DefaultTimer = GenericTimer<RealTimeProvider>;
 impl DefaultTimer {
-    pub fn new(duration: time::Duration) -> Self {
+    pub fn new_real(duration: time::Duration) -> Self {
         let mut provider = RealTimeProvider;
         let now = provider.now();
         GenericTimer {
@@ -187,6 +187,14 @@ mod timer_tests {
         let timer = GenericTimer::new(dur, provider);
         assert_eq!(timer.duration, dur);
         assert_eq!(timer.run_state, RunState::Paused);
+    }
+    #[test]
+    fn test_new_real() {
+        let dur = time::Duration::new(TOTAL_SECS, 0);
+        let timer = GenericTimer::new_real(dur);
+        assert_eq!(timer.duration, dur);
+        assert_eq!(timer.run_state, RunState::Paused);
+        //assert!() // TODO: Assert type of timer.time_provider
     }
 
     #[test]
