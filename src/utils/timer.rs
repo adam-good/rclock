@@ -6,8 +6,9 @@ use std::time;
 use std::fmt::Display;
 pub use time_provider::{TimeProvider, RealTimeProvider};
 
-pub trait Timer<T: TimeProvider> {
-    fn new(duration: time::Duration, provider: T) -> Self;
+pub trait Timer {
+    type Provider;
+    fn new(duration: time::Duration, provider: Self::Provider) -> Self;
     fn run(self) -> Self;
     fn pause(self) -> Self;
     fn tick(self) -> Self;
@@ -17,7 +18,7 @@ pub trait Timer<T: TimeProvider> {
 }
 
 #[derive(Debug)]
-struct GenericTimer<T: TimeProvider> {
+pub struct GenericTimer<T: TimeProvider> {
     time_provider: T, 
     last_update: time::Instant,
     duration: time::Duration,
@@ -53,8 +54,9 @@ impl<T: TimeProvider> Display for GenericTimer<T> {
     }
 }
 
-impl<T: TimeProvider> Timer<T> for GenericTimer<T> {
-    fn new(duration: time::Duration, mut provider: T) -> Self {
+impl<T: TimeProvider> Timer for GenericTimer<T> {
+    type Provider = T;
+    fn new(duration: time::Duration, mut provider: Self::Provider) -> Self {
         let now = provider.now();
         GenericTimer {
             time_provider: provider,
@@ -127,8 +129,18 @@ impl<T: TimeProvider> Timer<T> for GenericTimer<T> {
 }
 
 pub type DefaultTimer = GenericTimer<RealTimeProvider>;
-pub fn new_default(duration: time::Duration) -> DefaultTimer {
-    GenericTimer::new(duration, RealTimeProvider) 
+impl DefaultTimer {
+    pub fn new(duration: time::Duration) -> Self {
+        let mut provider = RealTimeProvider;
+        let now = provider.now();
+        GenericTimer {
+            time_provider: provider,
+            last_update: now,
+            duration,
+            run_state: RunState::Paused,
+            timer_state: TimerState::Active
+        }
+    }
 }
 
 // Unit Tests
